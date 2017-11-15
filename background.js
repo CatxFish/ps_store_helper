@@ -1,0 +1,68 @@
+function set_badge(enable){
+	const text = enable ? '':'off';
+	enable ? chrome.browserAction.setBadgeText({text}) :chrome.browserAction.setBadgeText({text});	
+}
+
+function set_insert_enable(enable){	
+	if(enable){
+		chrome.browserAction.setIcon({path: 'green.png'});	
+		chrome.browserAction.setBadgeBackgroundColor({color: '#ff0000'});	
+	}
+	else{
+		chrome.browserAction.setIcon({path: 'gray.png'});
+		chrome.browserAction.setBadgeBackgroundColor({color: '#cccccc'});		
+	}
+}
+
+function check_insert_enable(){
+	chrome.tabs.query({active: true,currentWindow: true}, function(tabs) {
+		tabs[0] && set_insert_enable(tabs[0].url.match(/^https:\/\/store.playstation.com\//g));
+	});
+}
+
+let extension_enable = true;
+
+chrome.storage.local.get('pss_meta',item =>{
+	item['pss_meta']!== undefined && (extension_enable = item['pss_meta']);
+	check_insert_enable();
+	set_badge(extension_enable);
+});
+
+chrome.tabs.onUpdated.addListener(function (tabId,changeInfo,tab) {
+	if(tab.url.match(/^https:\/\/store.playstation.com\//g) && extension_enable){
+		extension_enable && chrome.tabs.sendMessage(tab.id, { action: "inject_metacritic" });
+	}
+	check_insert_enable();
+});
+
+chrome.browserAction.onClicked.addListener(function (tab) {
+	extension_enable = extension_enable ? false : true;
+	set_badge(extension_enable);
+	if(tab.url.match(/^https:\/\/store.playstation.com\//g)){
+		const action = extension_enable ? 'inject_metacritic' : 'disable_inject';
+		chrome.tabs.sendMessage(tab.id, {action});
+	}
+	chrome.storage.local.set({'pss_meta':extension_enable });
+});
+
+chrome.tabs.onHighlighted.addListener(function(highlightInfo){
+	check_insert_enable();
+});
+
+chrome.runtime.onMessage.addListener(function(request, sender, callback) {
+    if (request.action === 'fetch_http') {
+		fetch(request.url,{method: 'get'})
+		.then(function(response) {
+			if (!response.ok) throw new Error(response.statusText);			
+			return response.text();
+		})
+		.then(function(response_text){
+			callback({state: 'ok',content: response_text});		
+			return;		
+		})
+		.catch(function(err){
+			callback({state: 'error',content:err});
+		})
+        return true; 
+    }
+});

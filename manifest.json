@@ -1,0 +1,26 @@
+{
+    "name": "PSStore Metascore",
+    "version": "1.0.0",
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "permissions": [
+        "https://store.playstation.com/*",
+		"http://www.metacritic.com/*",
+		"tabs",
+		"storage"
+    ],
+    "browser_action": {
+        "default_title": "PSStore Metascore",
+        "default_icon": "green.png"
+    },
+	
+	"content_scripts": [
+	   {
+		  "matches":    ["https://store.playstation.com/*"],
+		  "js":			["get_metacritic.js","content.js"],
+		  "css":        ["content.css"]
+	   }
+	],
+    "manifest_version": 2
+}
