@@ -131,17 +131,42 @@ function get_storage(psn_id){
 }
 
 function set_storage(psn_id,url,meta_score,user_score,meta_count,user_count){
-		const expire_date = get_expire_date(1);
-		const data = {url,meta_score,user_score,meta_count,user_count,expire_date};
-		chrome.storage.local.set({[psn_id]:data},function(){});
+	const expire_date = get_expire_date(7);
+	const data = {url,meta_score,user_score,meta_count,user_count,expire_date};
+	chrome.storage.local.set({[psn_id]:data},function(){});
+}
+
+async function get_us_store_id(psn_id){
+	const url=`https://store.playstation.com/en-US/product/${psn_id}`;
+	let state ='fail';
+	const response = await fetch(url);
+	if(response.ok) {
+		const us_store_id = response.url.match('([^\/]+)$')[1];
+		state = 'success';
+		return {state,us_store_id};
+	}
+
+	return {state};
 }
 
 async function get_metacritic_score(host,locale,psn_id,callback){
 	
 	let response=await get_storage(psn_id);
 	if(response.state !== 'success' && response.state!=='metacrtic not found'){
+		let search_id = psn_id;
+		let search_locale = locale;
 		let game_name;
-		let psn_info = await get_info_by_psn_id(host,locale,psn_id);		
+
+		//try fetch psstore US first
+		if(locale!='us'){
+			const us_store_info = await get_us_store_id(psn_id);
+			if(us_store_info.state ==='success'){
+				search_locale = 'us';
+				search_id = us_store_info.us_store_id;
+			}
+		}
+
+		let psn_info = await get_info_by_psn_id(host,search_locale,search_id);		
 		if(psn_info.state ==='success'){
 			for(let name of psn_info.data.game_names){
 				game_name = name;
