@@ -49,10 +49,9 @@ function transform_name(game_name){
 		return '';
 }
 
-function fetch_metacritic(game_name,platform){
+function fetch_metacritic(url){
 	return new Promise((resolve, reject) =>{
 		const action ='fetch_http';
-		const url = `http://www.metacritic.com/game/${platform}/${game_name}`;
 		chrome.runtime.sendMessage({action,url},response =>{
 			let state ='fetching';
 			if(response.state ==='ok'){
@@ -88,10 +87,10 @@ function fetch_metacritic(game_name,platform){
 
 }
 
-function is_not_expire(date_string){
+function is_expired(date_string){
 	const today = new Date();
 	const expire_day = new Date(date_string);
-	return (expire_day > today);
+	return (today > expire_day);
 }
 
 function get_expire_date(duration){
@@ -107,15 +106,20 @@ function get_storage(psn_id){
 	return new Promise((resolve, reject) =>{
 		chrome.storage.local.get(psn_id , item =>{
 			let state ='loading'
-			if(item && item[psn_id] && is_not_expire(item[psn_id].expire_date)){
-				if(item[psn_id].url){
+			if(item && item[psn_id]){
+				if(is_expired(item[psn_id].expire_date)){
+					const data = item[psn_id].url ? {url:item[psn_id].url} : {};
+					state = 'expired';
+					resolve({state,data});
+				}
+				else if(item[psn_id].url){
 					const url = item[psn_id].url;
 					const meta_score = item[psn_id].meta_score;
 					const user_score = item[psn_id].user_score;
 					const meta_count = item[psn_id].meta_count;
 					const user_count = item[psn_id].user_count;
 					const data = {url,meta_score,user_score,meta_count,user_count};
-					state = 'success';	
+					state = 'success';
 					resolve({state,data});
 				}
 				else{
@@ -131,7 +135,7 @@ function get_storage(psn_id){
 }
 
 function set_storage(psn_id,url,meta_score,user_score,meta_count,user_count){
-	const expire_date = get_expire_date(7);
+	const expire_date = url ? get_expire_date(7):get_expire_date(1);
 	const data = {url,meta_score,user_score,meta_count,user_count,expire_date};
 	chrome.storage.local.set({[psn_id]:data},function(){});
 }
@@ -151,40 +155,41 @@ async function get_us_store_id(psn_id){
 
 async function get_metacritic_score(host,locale,psn_id,callback){
 	
-	let response=await get_storage(psn_id);
-	if(response.state !== 'success' && response.state!=='metacrtic not found'){
+	let response = await get_storage(psn_id);
+	if(response.state !== 'success' && response.state !== 'metacrtic not found'){
 		let search_id = psn_id;
 		let search_locale = locale;
-		let game_name;
-
-		//try fetch psstore US first
-		if(locale!='us'){
-			const us_store_info = await get_us_store_id(psn_id);
-			if(us_store_info.state ==='success'){
-				search_locale = 'us';
-				search_id = us_store_info.us_store_id;
-			}
+		if(response.state == 'expired' && response.data.url){
+			response = await fetch_metacritic(response.data.url);	
 		}
-
-		let psn_info = await get_info_by_psn_id(host,search_locale,search_id);		
-		if(psn_info.state ==='success'){
-			for(let name of psn_info.data.game_names){
-				game_name = name;
-				response = await fetch_metacritic(name,psn_info.data.platform);				
-				if(response.state ==='success') {
-					break
+		else{
+			//try fetch psstore US first
+			if(locale!='us'){
+				const us_store_info = await get_us_store_id(psn_id);
+				if(us_store_info.state ==='success'){
+					search_locale = 'us';
+					search_id = us_store_info.us_store_id;
 				}
 			}
-		}		
+
+			let psn_info = await get_info_by_psn_id(host,search_locale,search_id);		
+			if(psn_info.state ==='success'){
+				for(let name of psn_info.data.game_names){				
+					const url = `http://www.metacritic.com/game/${psn_info.data.platform}/${name}`;
+					response = await fetch_metacritic(url);				
+					if(response.state ==='success') {
+						break
+					}
+				}
+			}	
+		}	
 		if(response.state !=='success'){
 			let state;
 			if(psn_info.state === 'success')
 				state =response.state;
 			else
 				state =psn_info.state;
-			const meta_score ='';
-			const user_score ='';
-			const data = {game_name,meta_score,user_score};
+			const data = {};
 			response = {state,data};
 			set_storage(psn_id,'','','');
 		}
