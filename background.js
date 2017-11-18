@@ -5,11 +5,11 @@ function set_badge(enable){
 
 function set_insert_enable(enable){	
 	if(enable){
-		chrome.browserAction.setIcon({path: 'green.png'});	
+		chrome.browserAction.setIcon({path: 'icon/green.png'});	
 		chrome.browserAction.setBadgeBackgroundColor({color: '#ff0000'});	
 	}
 	else{
-		chrome.browserAction.setIcon({path: 'gray.png'});
+		chrome.browserAction.setIcon({path: 'icon/gray.png'});
 		chrome.browserAction.setBadgeBackgroundColor({color: '#cccccc'});		
 	}
 }

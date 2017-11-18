@@ -1,6 +1,6 @@
 {
     "name": "PSStore Metascore",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "background": {
         "scripts": ["background.js"]
     },
@@ -12,9 +12,12 @@
     ],
     "browser_action": {
         "default_title": "PSStore Metascore",
-        "default_icon": "green.png"
+        "default_icon": "icon/green.png"
     },
-	
+    "icons": { "16": "icon/green16.png",
+        "48": "icon/green48.png",
+       "128": "icon/green128.png" 
+    },
 	"content_scripts": [
 	   {
 		  "matches":    ["https://store.playstation.com/*"],

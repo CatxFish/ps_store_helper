@@ -102,11 +102,11 @@ function inject_game_list(){
 			document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')
 			get_metacritic_score(window.location.host,locale,psn_id,(response)=>{
 				if(response.state ==='success'){
-					insert_meta_score(insert_div,response.data.meta_score);
+					insert_meta_score(insert_div,response.meta_score);
 					const insert_span = document.createElement('span');
 					insert_span.innerHTML= '|';
 					insert_div.appendChild(insert_span);
-					insert_user_score(insert_div,response.data.user_score);	
+					insert_user_score(insert_div,response.user_score);	
 				}
 			})
 		}
@@ -128,11 +128,12 @@ function inject_detail_page(){
 		sku_info.parentNode.insertBefore(insert_user_div,insert_div.nextSibling);	
 		get_metacritic_score(window.location.host,locale,psn_id,(response)=>{
 			if(response.state ==='success'){
+				const url = `http://www.metacritic.com/game/${response.platform}/${response.name}`;
 				insert_div.className='detail_metascore_container';
-				insert_detail_page_meta_score(insert_div,response.data.meta_score,response.data.meta_count,response.data.url);				
-				if(response.data.user_score!=='tbd'){
+				insert_detail_page_meta_score(insert_div,response.meta_score,response.meta_count,url);				
+				if(response.user_score!=='tbd'){
 					insert_user_div.className='detail_metascore_container';				
-					insert_detail_page_user_score(insert_user_div,response.data.user_score,response.data.user_count,response.data.url);	
+					insert_detail_page_user_score(insert_user_div,response.user_score,response.user_count,url);	
 				}
 			}
 		})		
