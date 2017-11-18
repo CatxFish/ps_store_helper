@@ -140,6 +140,15 @@ function inject_detail_page(){
 	}
 }
 
+function clear_inject(){
+	const meta_div = document.querySelector('#detail-meta-score');
+	const user_div = document.querySelector('#detail-user-score');
+	meta_div && meta_div.parentNode.removeChild(meta_div);
+	user_div && user_div.parentNode.removeChild(user_div);
+}
+
+let last_inject_url;
+
 const observer = new MutationObserver(function(mutations) {
     inject_detail_page();
 	inject_game_list();
@@ -150,6 +159,10 @@ chrome.runtime.onMessage.addListener((request, sender, callback) =>{
 		const target = document.querySelector('.application-container');
 		const config = { attributes: true, childList: true, characterData: true ,subtree: true};
 		observer.observe(target, config);
+		if(document.URL !== last_inject_url){
+			clear_inject();
+			last_inject_url = document.URL;
+		}
 	}
 	else if(request.action ==='disable_inject'){
 		observer.disconnect();
