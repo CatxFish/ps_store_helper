@@ -170,5 +170,6 @@ chrome.runtime.onMessage.addListener((request, sender, callback) =>{
 	}
 	else if(request.action ==='disable_inject'){
 		observer.disconnect();
+		clear_inject();
 	}
 })
