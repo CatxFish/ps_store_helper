@@ -1,6 +1,6 @@
 {
     "name": "PSStore Metascore",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "background": {
         "scripts": ["background.js"]
     },
