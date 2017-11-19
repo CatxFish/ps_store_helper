@@ -65,18 +65,6 @@ async function get_game_info_by_psn_id(host,locale,psn_id){
 	let psn_info = await get_game_info_from_storage(psn_id);
 	if(psn_info.state === 'not found'){
 		psn_info = await get_game_info_from_psn(host,locale,psn_id);
-		if(locale!='us'){
-			const us_store_page = await get_us_store_id(psn_id);
-			if(us_store_page.state ==='success'){
-				let psn_info_us = await get_game_info_from_psn(host,'us',us_store_page.id);
-				if(psn_info_us.state === 'success' && psn_info.state === 'success'){
-					psn_info.names.push(...psn_info_us.names);
-				}
-				else if(psn_info_us.state === 'success'){
-					psn_info = psn_info_us;
-				}
-			}
-		}
 
 		if(psn_info.names){
 			psn_info.names = psn_info.names.filter((elem,index,self) =>{	
@@ -242,14 +230,33 @@ async function get_us_store_id(psn_id){
 	return {state};
 }
 
-async function get_metacritic_score(host,locale,psn_id,callback){
-	let psn_info = await get_game_info_by_psn_id(host,locale,psn_id);
+async function get_metacritic_score(host,locale,psn_id,use_us_info=false){
+	let search_id = psn_id;
+	let search_locale = locale;
+	let psn_info ={};
 	let meta_info ={};
+	if(use_us_info){
+		const us_store_page = await get_us_store_id(psn_id);
+		if(us_store_page.state ==='success'){
+			search_id = us_store_page.id;
+			search_locale = 'us';
+		}
+		else{
+			meta_info.state = 'connect error';
+			return meta_info;
+		}
+	}
+
+	psn_info = await get_game_info_by_psn_id(host,search_locale,search_id);
+	
 	if(psn_info.state === 'success'){
 		meta_info = await get_metascore_by_psn_info(psn_info);
 	}
+	else{
+		meta_info.state = 'connect error';
+	}
 
-	if(meta_info.state && meta_info.state ==='success'){
+	if(meta_info.state ==='success'){
 		const names = [meta_info.name];
 		const isgame = true;
 		const platform = meta_info.platform;
@@ -257,7 +264,7 @@ async function get_metacritic_score(host,locale,psn_id,callback){
 		chrome.storage.local.set({[psn_id]:data});
 	}
 
-	callback(meta_info);
+	return meta_info;
 }
 
 

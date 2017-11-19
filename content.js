@@ -82,9 +82,9 @@ function insert_detail_page_user_score(node,score,count,url){
 	node.appendChild(insert_div);
 }
 
-function inject_game_list(){
+async function inject_game_list(){
 	let nodelist = [...document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')];
-	let res = nodelist.map((node)=>{
+	let res = nodelist.map(async (node)=>{
 		const locale = document.URL.split('/')[3].match('([^-]+)$')[1];
 		if(!node.querySelector('.metascore_container')){
 			const infoplane = node.querySelector('.grid-cell__body');
@@ -100,20 +100,22 @@ function inject_game_list(){
 			increase_height(infoplane,insert_div.offsetHeight);
 			increase_height(out_box,insert_div.offsetHeight);
 			document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')
-			get_metacritic_score(window.location.host,locale,psn_id,(response)=>{
-				if(response.state ==='success'){
-					insert_meta_score(insert_div,response.meta_score);
-					const insert_span = document.createElement('span');
-					insert_span.innerHTML= '|';
-					insert_div.appendChild(insert_span);
-					insert_user_score(insert_div,response.user_score);	
-				}
-			})
+			let response = await get_metacritic_score(window.location.host,locale,psn_id);
+			if(response.state ==='connect error'){
+				response = await get_metacritic_score(window.location.host,locale,psn_id,true);
+			}	
+			if(response.state ==='success'){
+				insert_meta_score(insert_div,response.meta_score);
+				const insert_span = document.createElement('span');
+				insert_span.innerHTML= '|';
+				insert_div.appendChild(insert_span);
+				insert_user_score(insert_div,response.user_score);	
+			}
 		}
 	})
 }
 
-function inject_detail_page(){
+async function inject_detail_page(){
 	const sku_info = document.querySelector('div.sku-info');
 	const meta_div = document.querySelector('#detail-meta-score');
 	const user_div = document.querySelector('#detail-user-score');
@@ -126,17 +128,19 @@ function inject_detail_page(){
 		insert_user_div.id = 'detail-user-score';
 		sku_info.parentNode.insertBefore(insert_div,sku_info.nextSibling);
 		sku_info.parentNode.insertBefore(insert_user_div,insert_div.nextSibling);	
-		get_metacritic_score(window.location.host,locale,psn_id,(response)=>{
-			if(response.state ==='success'){
-				const url = `http://www.metacritic.com/game/${response.platform}/${response.name}`;
-				insert_div.className='detail_metascore_container';
-				insert_detail_page_meta_score(insert_div,response.meta_score,response.meta_count,url);				
-				if(response.user_score!=='tbd'){
-					insert_user_div.className='detail_metascore_container';				
-					insert_detail_page_user_score(insert_user_div,response.user_score,response.user_count,url);	
-				}
+		let response = await get_metacritic_score(window.location.host,locale,psn_id);
+		if(response.state ==='connect error'){
+			response = await get_metacritic_score(window.location.host,locale,psn_id,true);
+		}	
+		if(response.state ==='success'){
+			const url = `http://www.metacritic.com/game/${response.platform}/${response.name}`;
+			insert_div.className='detail_metascore_container';
+			insert_detail_page_meta_score(insert_div,response.meta_score,response.meta_count,url);				
+			if(response.user_score!=='tbd'){
+				insert_user_div.className='detail_metascore_container';				
+				insert_detail_page_user_score(insert_user_div,response.user_score,response.user_count,url);	
 			}
-		})		
+		}				
 	}
 }
 
