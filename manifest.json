@@ -20,9 +20,9 @@
     },
 	"content_scripts": [
 	   {
-		  "matches":    ["https://store.playstation.com/*"],
-		  "js":			["get_metacritic.js","content.js"],
-		  "css":        ["content.css"]
+        "matches":["https://store.playstation.com/*"],
+        "js":["get_metacritic.js","content.js","psn_info.js"],
+        "css": ["content.css"]
 	   }
 	],
     "manifest_version": 2

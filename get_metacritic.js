@@ -1,92 +1,3 @@
-async function get_game_info_from_psn(host,locale,psn_id){
-	const url=`https://${host}/store/api/chihiro/00_09_000/container/${locale}/en/999/${psn_id}`;
-	const platform_list = {
-		'ps4':'playstation-4',
-		'ps3':'playstation-3',
-		'ps2':'playstation-2',
-		'ps':'playstation',
-		'psvita':'playstation-vita',
-		'psp':'psp'
-		};
-	
-	let state = 'fetching';
-	try{
-		const response = await fetch(url);		
-		if(!response.ok) {
-			throw 'connect error';
-		}
-		const psn_info = await response.json();
-		if(!psn_info.game_contentType){ 
-			throw 'type error';	
-		}
-		let platform = psn_info.playable_platform[0].toLowerCase().replace(/[^a-z\d\-]/g,'');
-		if( platform in platform_list){
-			let names =[];
-			psn_info.name && names.push(psn_info.name);
-			psn_info.title_name && names.push(psn_info.title_name);
-			psn_info.parent_name && names.push(psn_info.parent_name);
-			state = 'success';
-			platform = platform_list[platform];
-			return{state,platform,names};		
-		}
-		else{
-			throw 'platform error';
-		}		
-	}
-	catch(err) {
-		state=err;
-		return {state};
-	}
-		
-}
-
-function get_game_info_from_storage(psn_id){
-	return new Promise(resolve =>{
-		chrome.storage.local.get(psn_id , item =>{
-			let state ='loading';
-			if(item && item[psn_id]){
-				if(item[psn_id].isgame){
-					const platform = item[psn_id].platform;
-					const names = item[psn_id].names;
-					state = 'success';
-					resolve({state,platform,names});
-				}
-				else{
-					resolve({'state':'not game'});
-				}
-			}
-			else{				
-				resolve({'state':'not found'});		
-			}
-		})
-	})
-}
-async function get_game_info_by_psn_id(host,locale,psn_id){
-	let psn_info = await get_game_info_from_storage(psn_id);
-	if(psn_info.state === 'not found'){
-		psn_info = await get_game_info_from_psn(host,locale,psn_id);
-
-		if(psn_info.names){
-			psn_info.names = psn_info.names.filter((elem,index,self) =>{	
-				return index == self.indexOf(elem);
-			})
-		}
-
-		if(psn_info.state === 'success'){
-			const isgame = true;
-			const platform = psn_info.platform;
-			const names = psn_info.names;
-			const data = {isgame,platform,names};
-			chrome.storage.local.set({[psn_id]:data});		
-		}
-		else if(psn_info.state !=='connect error'){
-			const data = {isgame:false};
-			chrome.storage.local.set({[psn_id]:data});
-		}
-	}
-	return psn_info;
-}
-
 function filter_char(name){
 	if(name)
 		return name.replace(/ /g,'-').replace(/& /g,'').toLowerCase().replace(/[^a-z\d\?!\-]/g,'');	
@@ -176,7 +87,8 @@ async function get_metascore_from_metacritic(platform,name){
 
 async function get_metascore_by_psn_info(psn_info){
 	let meta_info;
-	for(let name of psn_info.names){				
+	let search_names = psn_info.m_name ? psn_info.m_name : psn_info.names
+	for(let name of search_names){				
 		meta_info = await get_metascore_from_storage(psn_info.platform,filter_char(name));
 		if(meta_info.state !=='not found'){
 			break;
@@ -257,11 +169,7 @@ async function get_metacritic_score(host,locale,psn_id,use_us_info=false){
 	}
 
 	if(meta_info.state ==='success'){
-		const names = [meta_info.name];
-		const isgame = true;
-		const platform = meta_info.platform;
-		const data = {isgame,platform,names};
-		chrome.storage.local.set({[psn_id]:data});
+		set_game_info_to_storage(psn_id,{m_name:[meta_info.name]});
 	}
 
 	return meta_info;
