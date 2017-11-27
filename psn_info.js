@@ -1,14 +1,45 @@
+function filter_char(name,replace_space='-'){
+	if(name){
+        const re = new RegExp(`[^a-z\\d\\?!\\${replace_space}]`,'g');
+        const filter_name = name.replace(/ /g,replace_space).replace(/& /g,'').toLowerCase().replace(re,'');
+        return filter_name;
+    }
+	else{
+        return '';
+    }
+}
+
+function is_expired(date_string){
+	const today = new Date();
+	const expire_day = new Date(date_string);
+	return (today > expire_day);
+}
+
+function get_expire_date(duration){
+	const expire_time= new Date(new Date().getTime() + duration * 24 * 60 * 60 * 1000);
+	const mm = expire_time.getMonth()+1;
+	const dd = expire_time.getDate();
+	const yy = expire_time.getFullYear();;
+	const expire_day = `${mm}/${dd}/${yy}`;
+	return expire_day;
+}
+
+async function get_us_store_id(psn_id){
+	const url=`https://store.playstation.com/en-US/product/${psn_id}`;
+	let state ='fail';
+	const response = await fetch(url);
+	if(response.ok) {
+		const id = response.url.match('([^\/]+)$')[1];
+		state = 'success';
+		return {state,id};
+	}
+
+	return {state};
+}
+
 async function get_game_info_from_psn(host,locale,psn_id){
 	const url=`https://${host}/store/api/chihiro/00_09_000/container/${locale}/en/999/${psn_id}`;
-	const platform_list = {
-		'ps4':'playstation-4',
-		'ps3':'playstation-3',
-		'ps2':'playstation-2',
-		'ps':'playstation',
-		'psvita':'playstation-vita',
-		'psp':'psp'
-		};
-	
+	const platform_list = ['ps4','ps3','ps2','ps','psvita','psp'];
 	let state = 'fetching';
 	try{
 		const response = await fetch(url);		
@@ -20,14 +51,13 @@ async function get_game_info_from_psn(host,locale,psn_id){
 			throw 'type error';	
 		}
 		let platform = res_json.playable_platform[0].toLowerCase().replace(/[^a-z\d\-]/g,'');
-		if( platform in platform_list){
+		if( platform_list.indexOf(platform)!=-1){
             let names=[];
 			res_json.name && names.push(res_json.name);
 			res_json.title_name && names.push(res_json.title_name);
             res_json.parent_name && names.push(res_json.parent_name);
             names = names.filter((elem,index,self) =>{return index == self.indexOf(elem)});
 			state = 'success';
-			platform = platform_list[platform];
 			return{state,platform,names};		
 		}
 		else{

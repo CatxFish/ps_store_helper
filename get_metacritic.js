@@ -1,10 +1,3 @@
-function filter_char(name){
-	if(name)
-		return name.replace(/ /g,'-').replace(/& /g,'').toLowerCase().replace(/[^a-z\d\?!\-]/g,'');	
-	else
-		return '';
-}
-
 function save_metascore_to_storage(meta_info,exist){
 	const key = `${meta_info.platform}/${meta_info.name}`;
 	let data ={};
@@ -88,13 +81,14 @@ async function get_metascore_from_metacritic(platform,name){
 async function get_metascore_by_psn_info(psn_info){
 	let meta_info;
 	let search_names = psn_info.m_name ? psn_info.m_name : psn_info.names
-	for(let name of search_names){				
-		meta_info = await get_metascore_from_storage(psn_info.platform,filter_char(name));
+	for(let name of search_names){
+		const platform = get_metacritic_platform_alias(psn_info.platform);			
+		meta_info = await get_metascore_from_storage(platform,filter_char(name));
 		if(meta_info.state !=='not found'){
 			break;
 		}
 		else{
-			meta_info = await get_metascore_from_metacritic(psn_info.platform,filter_char(name));
+			meta_info = await get_metascore_from_metacritic(platform,filter_char(name));
 		}	
 		if(meta_info.state ==='success'){
 			save_metascore_to_storage(meta_info,true);
@@ -113,33 +107,6 @@ async function get_metascore_by_psn_info(psn_info){
 	}
 
 	return meta_info;
-}
-
-function is_expired(date_string){
-	const today = new Date();
-	const expire_day = new Date(date_string);
-	return (today > expire_day);
-}
-
-function get_expire_date(duration){
-	const expire_time= new Date(new Date().getTime() + duration * 24 * 60 * 60 * 1000);
-	const mm = expire_time.getMonth()+1;
-	const dd = expire_time.getDate();
-	const yy = expire_time.getFullYear();;
-	const expire_day = `${mm}/${dd}/${yy}`;
-	return expire_day;
-}
-async function get_us_store_id(psn_id){
-	const url=`https://store.playstation.com/en-US/product/${psn_id}`;
-	let state ='fail';
-	const response = await fetch(url);
-	if(response.ok) {
-		const id = response.url.match('([^\/]+)$')[1];
-		state = 'success';
-		return {state,id};
-	}
-
-	return {state};
 }
 
 async function get_metacritic_score(host,locale,psn_id,use_us_info=false){
@@ -175,6 +142,20 @@ async function get_metacritic_score(host,locale,psn_id,use_us_info=false){
 	return meta_info;
 }
 
+function get_metacritic_platform_alias(name){
+	const platform_list = {
+		'ps4':'playstation-4',
+		'ps3':'playstation-3',
+		'ps2':'playstation-2',
+		'ps':'playstation',
+		'psvita':'playstation-vita',
+		'psp':'psp'
+		};
+	
+	if(name in platform_list){
+		return platform_list[name];
+	}
+}
 
 
 

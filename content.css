@@ -24,7 +24,11 @@
 	border: 1px solid rgba(255,255,255,0.1);
 	background-color: rgba(255,255,255,0.05);
     padding: 0.5em;
-	margin-top: 0.8em;
+    margin-top: 0.8em;
+}
+
+.detail_metascore_container a:hover{
+    color: #87cefa;
 }
 
 .detail_metascore_title{
@@ -39,6 +43,14 @@
 .metascore_container{
 	height:2em;
     padding: .4375em;
+}
+
+.discount_container{
+    font-size: 0.85em!important;
+}
+
+.discount_container a:hover{
+    color: #87cefa;
 }
 
 .user{
