@@ -29,7 +29,7 @@ chrome.storage.local.get('pss_meta',item =>{
 });
 
 chrome.storage.local.get('pss_version',item=>{
-	const current_version = chrome.app.getDetails().version; 
+	const current_version = chrome.runtime.getManifest().version;
 	const storage_version = item && item['pss_version']?item['pss_version']:'0.0.0';
 	if(current_version !== storage_version){
 		chrome.storage.local.clear();
