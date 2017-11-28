@@ -1,6 +1,6 @@
 {
-    "name": "PSStore Metascore",
-    "version": "1.0.4",
+    "name": "PS Store Helper",
+    "version": "1.0.5",
     "background": {
         "scripts": ["background.js"]
     },
@@ -12,8 +12,8 @@
 		"storage"
     ],
     "browser_action": {
-        "default_title": "PSStore Metascore",
-        "default_icon": "icon/green.png"
+        "default_title": "PS Store Helper",
+        "default_icon": "icon/green128.png"
     },
     "icons": { "16": "icon/green16.png",
         "48": "icon/green48.png",

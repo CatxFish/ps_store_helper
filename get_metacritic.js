@@ -118,7 +118,7 @@ async function get_metacritic_score(host,locale,psn_id,use_us_info=false){
 		const us_store_page = await get_us_store_id(psn_id);
 		if(us_store_page.state ==='success'){
 			search_id = us_store_page.id;
-			search_locale = 'us';
+			search_locale = 'en-us';
 		}
 		else{
 			meta_info.state = 'connect error';
@@ -128,7 +128,7 @@ async function get_metacritic_score(host,locale,psn_id,use_us_info=false){
 
 	psn_info = await get_game_info_by_psn_id(host,search_locale,search_id);
 	
-	if(psn_info.state === 'success'){
+	if(psn_info.state === 'success' || psn_info.m_name){
 		meta_info = await get_metascore_by_psn_info(psn_info);
 	}
 	else{

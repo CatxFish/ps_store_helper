@@ -5,7 +5,7 @@ function set_badge(enable){
 
 function set_insert_enable(enable){	
 	if(enable){
-		chrome.browserAction.setIcon({path: 'icon/green.png'});	
+		chrome.browserAction.setIcon({path: 'icon/green128.png'});	
 		chrome.browserAction.setBadgeBackgroundColor({color: '#ff0000'});	
 	}
 	else{

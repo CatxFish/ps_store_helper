@@ -1,7 +1,7 @@
-function filter_char(name,replace_space='-'){
+function filter_char(name){
 	if(name){
-        const re = new RegExp(`[^a-z\\d\\?!\\${replace_space}]`,'g');
-        const filter_name = name.replace(/ /g,replace_space).replace(/& /g,'').toLowerCase().replace(re,'');
+        const re = new RegExp(`[^a-z\\d\\?!\\-]`,'g');
+        const filter_name = name.replace(/ /g,'-').replace(/& /g,'').toLowerCase().replace(re,'');
         return filter_name;
     }
 	else{
@@ -37,8 +37,8 @@ async function get_us_store_id(psn_id){
 	return {state};
 }
 
-async function get_game_info_from_psn(host,locale,psn_id){
-	const url=`https://${host}/store/api/chihiro/00_09_000/container/${locale}/en/999/${psn_id}`;
+async function get_game_info_from_psn(host,country,lang,psn_id){
+	const url=`https://${host}/store/api/chihiro/00_09_000/container/${country}/${lang}/999/${psn_id}`;
 	const platform_list = ['ps4','ps3','ps2','ps','psvita','psp'];
 	let state = 'fetching';
 	try{
@@ -57,7 +57,7 @@ async function get_game_info_from_psn(host,locale,psn_id){
 			res_json.title_name && names.push(res_json.title_name);
             res_json.parent_name && names.push(res_json.parent_name);
             names = names.filter((elem,index,self) =>{return index == self.indexOf(elem)});
-			state = 'success';
+			state = lang==='en'?'success':'not english';
 			return{state,platform,names};		
 		}
 		else{
@@ -76,7 +76,7 @@ function get_game_info_from_storage(psn_id){
 		chrome.storage.local.get(psn_id , item =>{
 			let state ='loading';
 			if(item && item[psn_id]){
-                state = item[psn_id].isgame? 'success' : 'not game';
+                state = item[psn_id].state;
 				resolve({state,...item[psn_id]});
 			}
 			else{				
@@ -101,17 +101,24 @@ function set_game_info_to_storage(psn_id,data){
 async function get_game_info_by_psn_id(host,locale,psn_id){
 	let psn_info = await get_game_info_from_storage(psn_id);
 	if(psn_info.state === 'not found'){
-		psn_info = await get_game_info_from_psn(host,locale,psn_id);
+        const locale_list = locale.split('-');
+        const country = locale_list[locale_list.length-1];
+        const lang = locale_list[0];
+        psn_info = await get_game_info_from_psn(host,country,'en',psn_id);
+        
+        if(psn_info.state === 'connect error'){
+            psn_info = await get_game_info_from_psn(host,country,lang,psn_id);
+        }
 
-		if(psn_info.state === 'success'){
-			const isgame = true;
+		if(psn_info.state === 'success'|| psn_info.state ==='not english'){
+			const state = psn_info.state;
 			const platform = psn_info.platform;
 			const names = psn_info.names;
-			const data = {isgame,platform,names};
+			const data = {state,platform,names};
 			set_game_info_to_storage(psn_id,data);		
-		}
+        }
 		else if(psn_info.state !=='connect error'){
-			const data = {isgame:false};
+			const data = {state:'not game'};
 			set_game_info_to_storage(psn_id,data);
 		}
 	}

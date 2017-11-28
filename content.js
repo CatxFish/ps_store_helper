@@ -86,7 +86,7 @@ function insert_detail_page_discount(node,low_price,low_plus_price,url){
 	const title = document.createElement('p');
 	const price = document.createElement('p');
 	const divider = document.createElement('hr');
-	title.innerHTML=`Lowest Price:`;
+	title.innerHTML=`Lowest price:`;
 	price.innerHTML=`<a href="${url}" target="_blank"><span> ${low_price}  </span>/<span>  ${low_plus_price}</span>(PS+)</a>`;
 	divider.className='sku-info__divider';
 	node.appendChild(title);
@@ -176,12 +176,14 @@ async function inject_discount_info_detail_page(){
 function clear_inject(){
 	const meta_div = document.querySelector('#detail-meta-score');
 	const user_div = document.querySelector('#detail-user-score');
+	const discount_div = document.querySelector('#detail-discount');
 	meta_div && meta_div.parentNode.removeChild(meta_div);
 	user_div && user_div.parentNode.removeChild(user_div);
+	discount_div && discount_div.parentNode.removeChild(discount_div);
 }
 
 let last_inject_url;
-const locale = document.URL.split('/')[3].match('([^-]+)$')[1];
+const locale = document.URL.split('/')[3];
 
 const observer = new MutationObserver( mutations=> {
 	inject_detail_page();
