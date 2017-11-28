@@ -28,6 +28,16 @@ chrome.storage.local.get('pss_meta',item =>{
 	set_badge(extension_enable);
 });
 
+chrome.storage.local.get('pss_version',item=>{
+	const current_version = chrome.app.getDetails().version; 
+	const storage_version = item && item['pss_version']?item['pss_version']:'0.0.0';
+	if(current_version !== storage_version){
+		chrome.storage.local.clear();
+	}
+	chrome.storage.local.set({'pss_version': current_version});
+});
+
+
 chrome.tabs.onUpdated.addListener(function (tabId,changeInfo,tab) {
 	if(tab.url.match(/^https:\/\/store.playstation.com\//g) && extension_enable){
 		extension_enable && chrome.tabs.sendMessage(tab.id, { action: "inject_metacritic" });
