@@ -14,6 +14,8 @@ see [Chrome web store](https://chrome.google.com/webstore/detail/psstore-metasco
  Slovakia, Slovenia, South Africa, Sweden, Taiwan, Thailand, Turkey, United Arab Emirates
  
 # Change Log:
+## [1.1.1]
+- fix an bug after update 1.0.x to 1.1.x
 ## [1.1.0] 
-- Add Lowest Price in History Information feature
+- Add lowest price in history information feature
 - Extension name change to "PS Store Helper"
