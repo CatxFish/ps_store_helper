@@ -15,10 +15,12 @@ see [Chrome web store](https://chrome.google.com/webstore/detail/ps-store-helper
  Slovakia, Slovenia, South Africa, Sweden, Taiwan, Thailand, Turkey, United Arab Emirates
  
 # Change Log:
+## [1.1.3]
+- fix extension get wrong id when using outside ad link into playstation store page
 ## [1.1.2]
 - modify function due to the firefox compatibility
 ## [1.1.1]
-- fix an bug after update 1.0.x to 1.1.x
+- fix a storage bug after update 1.0.x to 1.1.x
 ## [1.1.0] 
 - Add lowest price in history information feature
 - Extension name change to "PS Store Helper"
