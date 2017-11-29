@@ -104,7 +104,7 @@ async function inject_game_list(){
 			const infoplane_bot = infoplane.querySelector('.grid-cell__bottom');
 			const infoplane_parent = infoplane_bot.parentNode;
 			const psn_link = infoplane.querySelector('a');
-			const psn_id = psn_link.getAttribute("href").match('([^\/]+)$')[1];
+			const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
 			insert_div.className='metascore_container';
 			infoplane_parent.insertBefore(insert_div,infoplane_bot);
 			increase_height(node,insert_div.offsetHeight);
@@ -134,7 +134,7 @@ async function inject_detail_page(){
 	if(sku_info && !meta_div && !user_div){
 		const insert_div = document.createElement('div');
 		const insert_user_div = document.createElement('div');
-		const psn_id = document.URL.match('([^\/]+)$')[1];		
+		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');		
 		insert_div.id = 'detail-meta-score';
 		insert_user_div.id = 'detail-user-score';
 		sku_info.parentNode.insertBefore(insert_div,sku_info.nextSibling);
@@ -162,7 +162,7 @@ async function inject_discount_info_detail_page(){
 	if(sku_info && !discount_div){
 		const insert_low_price = document.createElement('div');
 		const playable = sku_info.querySelector('.playable-on');
-		const psn_id = document.URL.match('([^\/]+)$')[1];
+		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');
 		sku_info.insertBefore(insert_low_price,playable);
 		insert_low_price.id='detail-discount';
 		let response = await get_lowest_price(window.location.host,locale,psn_id);
