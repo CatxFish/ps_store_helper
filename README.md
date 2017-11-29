@@ -1,12 +1,13 @@
-# PSStore_Metascore
+# PS Store helper
 A simple chrome extension for injecting metacritic score on Playstation store page
 
 # Install
-see [Chrome web store](https://chrome.google.com/webstore/detail/psstore-metascore/ldjfkloldnlohgeblkanmjeehpeapbep) or [Firefox addons](https://addons.mozilla.org/firefox/addon/psstoremetascore/)
+see [Chrome web store](https://chrome.google.com/webstore/detail/ps-store-helper/ldjfkloldnlohgeblkanmjeehpeapbep) or [Firefox addons](https://addons.mozilla.org/firefox/addon/psstoremetascore/)
 
 # Feature
-- Inject metascore and user rating on list page and search page
-- Inject metascore and user rating and metacritic link on detail information page
+- Inject metascore and user rating to list page and search page
+- Inject metascore and user rating and metacritic link to detail information page
+- Inject Lowest price in History to detail information page
 
 # Restriction
 - The following locales get better search results because they provide english interface .
