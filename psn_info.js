@@ -52,10 +52,10 @@ async function get_game_info_from_psn(host,country,lang,psn_id){
 		}
 		let platform = res_json.playable_platform[0].toLowerCase().replace(/[^a-z\d\-]/g,'');
 		if( platform_list.indexOf(platform)!=-1){
-            let names=[];
+			let names=[];
 			res_json.name && names.push(res_json.name);
 			res_json.title_name && names.push(res_json.title_name);
-            res_json.parent_name && names.push(res_json.parent_name);
+			res_json.parent_name && names.push(res_json.parent_name);
             names = names.filter((elem,index,self) =>{return index == self.indexOf(elem)});
 			state = lang==='en'?'success':'not english';
 			return{state,platform,names};		

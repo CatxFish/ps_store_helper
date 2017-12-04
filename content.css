@@ -3,10 +3,10 @@
 }
 
 .mixed{
-	background-color: #fc3;
+    background-color: #fc3;
 }
 .negtive{
-	background-color: #f00;
+    background-color: #f00;
 }
 .tbd{
     background-color: #ccc;
@@ -17,12 +17,12 @@
 }
 
 .large{
-	font-size: 1.5em!important;
+    font-size: 1.5em!important;
 }
 
 .detail_metascore_container{
-	border: 1px solid rgba(255,255,255,0.1);
-	background-color: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.05);
     padding: 0.5em;
     margin-top: 0.8em;
 }
@@ -32,16 +32,16 @@
 }
 
 .detail_metascore_title{
-	font-weight: bold;
+    font-weight: bold;
 }
 
 .detail_metascore_text{
-	display: inline-block;
+    display: inline-block;
     vertical-align: middle;
-	margin-left: 0.8em;
+    margin-left: 0.8em;
 }
 .metascore_container{
-	height:2em;
+    height:2em;
     padding: .4375em;
 }
 
@@ -54,13 +54,13 @@
 }
 
 .user{
-	border-radius: 55%;
+    border-radius: 55%;
     height: 2em;
     width: 2em;
     line-height: 2.18em;
 }
 .metascore_w {
-	display: inline-block;
+    display: inline-block;
     vertical-align: middle;
     text-align: center;
     color: #fff!important;
