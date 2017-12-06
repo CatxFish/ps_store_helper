@@ -72,7 +72,7 @@ async function get_lowest_price(host,locale,psn_id){
     let psn_info = await get_game_info_by_psn_id(host,locale,psn_id);
 
     if(psn_info.state === 'success' || psn_info.state === 'not english'){
-        if(psn_info.discount && !is_expired(psn_info.discount.expired_date)){
+        if(psn_info.discount && !is_expired(psn_info.discount.expire_date)){
             discount_info ={state:'success',...psn_info.discount};
         }
         else{

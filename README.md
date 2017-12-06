@@ -1,5 +1,5 @@
 # PS Store helper
-A simple chrome extension for injecting metacritic score on Playstation store page
+A simple chrome extension for injecting metacritic score to Playstation store page
 
 # Install
 see [Chrome web store](https://chrome.google.com/webstore/detail/ps-store-helper/ldjfkloldnlohgeblkanmjeehpeapbep) or [Firefox addons](https://addons.mozilla.org/firefox/addon/psstoremetascore/)
@@ -15,6 +15,8 @@ see [Chrome web store](https://chrome.google.com/webstore/detail/ps-store-helper
  Slovakia, Slovenia, South Africa, Sweden, Taiwan, Thailand, Turkey, United Arab Emirates
  
 # Change Log:
+## [1.1.4]
+- fix lowest price does not update correctly
 ## [1.1.3]
 - fix extension get wrong id when using outside ad link into playstation store page
 ## [1.1.2]
