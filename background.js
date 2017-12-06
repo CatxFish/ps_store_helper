@@ -15,7 +15,7 @@ function set_insert_enable(enable){
 }
 
 function check_insert_enable(){
-	chrome.tabs.query({active: true,currentWindow: true}, function(tabs) {
+	chrome.tabs.query({active: true,currentWindow: true}, tabs => {
 		tabs[0] && set_insert_enable(tabs[0].url.match(/^https:\/\/store.playstation.com\//g));
 	});
 }
@@ -38,14 +38,14 @@ chrome.storage.local.get('pss_version',item=>{
 });
 
 
-chrome.tabs.onUpdated.addListener(function (tabId,changeInfo,tab) {
+chrome.tabs.onUpdated.addListener((tabId,changeInfo,tab) =>{
 	if(tab.url.match(/^https:\/\/store.playstation.com\//g) && extension_enable){
 		extension_enable && chrome.tabs.sendMessage(tab.id, { action: "inject_metacritic" });
 	}
 	check_insert_enable();
 });
 
-chrome.browserAction.onClicked.addListener(function (tab) {
+chrome.browserAction.onClicked.addListener(tab => {
 	extension_enable = extension_enable ? false : true;
 	set_badge(extension_enable);
 	if(tab.url.match(/^https:\/\/store.playstation.com\//g)){
@@ -55,22 +55,22 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 	chrome.storage.local.set({'pss_meta':extension_enable });
 });
 
-chrome.tabs.onHighlighted.addListener(function(highlightInfo){
+chrome.tabs.onHighlighted.addListener(highlightInfo =>{
 	check_insert_enable();
 });
 
-chrome.runtime.onMessage.addListener(function(request, sender, callback) {
+chrome.runtime.onMessage.addListener((request, sender, callback)=> {
     if (request.action === 'fetch_http') {
 		fetch(request.url,{method: 'get'})
-		.then(function(response) {
+		.then(response=> {
 			if (!response.ok) throw new Error(response.statusText);			
 			return response.text();
 		})
-		.then(function(response_text){
+		.then(response_text =>{
 			callback({state: 'ok',content: response_text});		
 			return;		
 		})
-		.catch(function(err){
+		.catch(err =>{
 			callback({state: 'error',content:err});
 		})
         return true; 
