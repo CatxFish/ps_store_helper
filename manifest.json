@@ -1,6 +1,6 @@
 {
     "name": "PS Store Helper",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "background": {
         "scripts": ["background.js"]
     },
@@ -15,9 +15,10 @@
         "default_title": "PS Store Helper",
         "default_icon": "icon/green128.png"
     },
-    "icons": { "16": "icon/green16.png",
+    "icons": { 
+        "16": "icon/green16.png",
         "48": "icon/green48.png",
-       "128": "icon/green128.png" 
+        "128": "icon/green128.png" 
     },
     "content_scripts": [{
         "matches":["https://store.playstation.com/*"],

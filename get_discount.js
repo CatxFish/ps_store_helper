@@ -12,10 +12,10 @@ function adjust_price(low_price,low_plus_price){
     return low_plus_price;
 }
 
-async function search_discount_link(country,host,game_title,psn_id){	
-    const action ='fetch_http';
-    const search_key = game_title.replace(/\'/g,'').replace(/\s+/g,'+');
-    const url = `https://psdeals.net/${country}-store/all-games?search=${search_key}&sort=title-desc`;
+async function search_discount_link(country,host,key,psn_id,page_count){
+    
+    const page = page_count.toString()
+    const url = `https://psdeals.net/${country}-store/all-games/${page}?search=${key}&sort=title-desc`;
     try{
         const response = await fetch(url);  
         if(!response.ok){
@@ -36,6 +36,12 @@ async function search_discount_link(country,host,game_title,psn_id){
                 break;
             }
         }
+
+        const next_page = doc.querySelector('li.next>a');
+        if(discount_link.state !== 'success' && next_page && page_count < 6 ){
+            return search_discount_link(country,host,key,psn_id,page_count+1);
+        }
+
         return discount_link;          
     }
     catch(err) {
@@ -80,7 +86,8 @@ async function get_lowest_price(host,locale,psn_id){
             if(!psn_info.discount || !psn_info.discount.url){
                 const locale_list = locale.split('-');
                 const country = locale_list[locale_list.length-1];
-                const search_result = await search_discount_link(country,host,psn_info.names[0],psn_id);
+                const search_key = psn_info.names[0].replace(/\'/g,'').replace(/ +/g,'+');
+                const search_result = await search_discount_link(country,host,search_key,psn_id,1);
                 url = search_result.state === 'success' ? search_result.url:'';                      
             }
             else{

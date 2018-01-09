@@ -1,7 +1,7 @@
 function filter_char(name){
 	if(name){
-        const re = new RegExp(`[^a-z\\d\\?!\\-]`,'g');
-        const filter_name = name.replace(/ /g,'-').replace(/& /g,'').toLowerCase().replace(re,'');
+        const re = new RegExp(`[^\\w\\s\\-\\+\\!]`,'g');
+        const filter_name = name.toLowerCase().replace(re,'').replace(/ +/g,'-').replace(/& /g,'')
         return filter_name;
     }
 	else{
