@@ -1,162 +1,179 @@
-function save_metascore_to_storage(meta_info,exist){
-	const key = `${meta_info.platform}/${meta_info.name}`;
-	let data ={};
-	if(exist){
-		const expire_date = get_expire_date(7);
-		const meta_score = meta_info.meta_score;
-		const user_score = meta_info.user_score;
-		const meta_count = meta_info.meta_count;
-		const user_count = meta_info.user_count;
-		data = {exist,meta_score,user_score,meta_count,user_count,expire_date};
-	}
-	else{
-		const expire_date = get_expire_date(1);
-		data = {exist,expire_date};
-	}
-	chrome.storage.local.set({[key]:data});
-}
+class MetaInfo{
 
-function get_metascore_from_storage(platform,name){
-	return new Promise(resolve =>{				
-		const key = `${platform}/${name}`;
-		chrome.storage.local.get(key , item =>{
-			if(item && item[key] && !is_expired(item[key].expire_date)){
-				if(item[key].exist){
-					const meta_score = item[key].meta_score;
-					const user_score = item[key].user_score;
-					const meta_count = item[key].meta_count;
-					const user_count = item[key].user_count;
-					resolve ({state:'success',platform,name,meta_score,user_score,meta_count,user_count});
+	constructor(host,locale,psn_id){
+		this.host = host;
+		this.id = psn_id;
+		this.locale = locale;
+		this.state ="not connect";
+		this.meta_score = "";
+		this.user_score = "";
+		this.meta_count = "";
+		this.user_count = "";
+		this.platform = "";
+		this.meta_name = [];
+		this.url='';
+	}
+
+	async load_metacritic_name_from_stroage(key){
+		const data = await Utility.get_data(key);
+		if (data && data.m_skip_time && ! Utility.is_expired(data.m_skip_time)){
+			this.state = 'skip';
+			return true;
+		}
+		if (data && data.m_name && data.platform){
+			this.platform = data.platform;
+			this.meta_name.push(data.m_name);
+			this.url = `http://www.metacritic.com/game/${data.platform}/${data.m_name}`;
+			return true;
+		}		
+	}
+
+	save_metacritic_name_to_storage(key,name){
+		const data ={m_name:name};
+		return Utility.set_data(key,data);
+	}
+
+	set_skip_time_to_storage(key,days){
+		const date = Utility.get_expire_date(days);
+		const data ={m_skip_time:date};
+		return Utility.set_data(key,data);
+	}
+
+	save_metascore_to_storage(name){
+		const key = `${this.platform}/${name}`;
+		let data ={};
+		const expire_date = Utility.get_expire_date(7);
+		const meta_score = this.meta_score;
+		const user_score = this.user_score;
+		const meta_count = this.meta_count;
+		const user_count = this.user_count;
+		data = {meta_score,user_score,meta_count,user_count,expire_date};
+	
+		return Utility.set_data(key,data);
+	}
+
+	async load_metascore_from_storage(){
+		const key = `${this.platform}/${this.meta_name[0]}`;
+		const data = await Utility.get_data(key);			
+		if(data && ! Utility.is_expired(data.expire_date)){
+			this.meta_score = data.meta_score;
+			this.user_score = data.user_score;
+			this.meta_count = data.meta_count;
+			this.user_count = data.user_count;
+			this.state = "ok";
+			return true;
+		}
+		else if (data && data.exist){
+				this.state = "expired";
+				return false;
+		}
+		else{
+			this.state = "error";
+			return false;
+		}
+	}
+
+	filter_char(name){
+		if(name){
+			const re = new RegExp(`[^\\w\\s\\-\\+\\!]`,'g');
+			const filter_name = name.toLowerCase().replace(re,'').replace(/ +/g,'-').replace(/& /g,'')
+			return filter_name;
+		}
+		else{
+			return '';
+		}
+	}
+
+	async get_metascore_from_metacritic(name){
+		return new Promise(resolve =>{	
+			const action ='fetch_http';
+			const platform = this.get_metacritic_platform_alias(this.platform);
+			const url = `http://www.metacritic.com/game/${platform}/${name}`;
+			chrome.runtime.sendMessage({action,url},response =>{
+				this.state ='fetching metacritic';
+				if(response.state ==='ok'){
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(response.content,"text/html");		
+					if(doc.querySelector('div.section.product_scores')){
+						const meta_score_obj = doc.querySelector('span[itemprop=ratingValue]');
+						const user_score_obj = doc.querySelector('div.metascore_w.user');
+						const meta_critic_count_obj = doc.querySelector('span[itemprop=reviewCount]');
+						const user_count_obj = doc.querySelector('.feature_userscore > .summary > p > .count > a');
+						this.meta_score = meta_score_obj? meta_score_obj.innerHTML : 'tbd';
+						this.user_score = user_score_obj? user_score_obj.innerHTML : 'tbd';
+						this.meta_count = meta_critic_count_obj? meta_critic_count_obj.innerHTML : '0';
+						this.user_count = user_count_obj ? user_count_obj.innerHTML.replace(/\D+/g,''): '0';
+						this.url = url;
+						this.state = 'ok';				
+						resolve(true);
+					}
+					else{
+						this.state = 'connect error';
+						resolve (false);
+					}			
 				}
 				else{
-					resolve ({'state':'metacritic not found'});
+					this.state = 'connect error';
+					resolve(false);
 				}
-			}
-			else if (item && item[key] && item[key].exist){
-				resolve({state:'expired',platform,name});
-			}
-			else{
-				resolve({'state':'not found'});
-			}
+			});
 		})
-	})
-}
+	}
 
-async function get_metascore_from_metacritic(platform,name){
-	return new Promise(resolve =>{	
-		const action ='fetch_http';
-		const url = `http://www.metacritic.com/game/${platform}/${name}`;
-		chrome.runtime.sendMessage({action,url},response =>{
-			let state ='fetching';
-			if(response.state ==='ok'){
-				const doc = document.implementation.createHTMLDocument('extern-http');
-				let meta_score_connect4_obj;
-				doc.documentElement.innerHTML = response.content;
-				score_section = doc.querySelector('div.section.product_scores')			
-				if(score_section){
-					const meta_score_obj = doc.querySelector('span[itemprop=ratingValue]');
-					const user_score_obj = doc.querySelector('div.metascore_w.user');
-					const meta_critic_count_obj = doc.querySelector('span[itemprop=reviewCount]');
-					const user_count_obj = doc.querySelector('.feature_userscore > .summary > p > .count > a');
-					const meta_score = meta_score_obj? meta_score_obj.innerHTML : 'tbd';
-					const user_score = user_score_obj? user_score_obj.innerHTML : 'tbd';
-					const meta_count = meta_critic_count_obj? meta_critic_count_obj.innerHTML : '0';
-					const user_count = user_count_obj ? user_count_obj.innerHTML.replace(/\D+/g,''): '0';
-					state = 'success';				
-					resolve({state,platform,name,meta_score,user_score,meta_count,user_count});
-				}
-				else{
-					state = 'connect error';
-					resolve ({state});
-				}			
-			}
-			else{
-				state = 'connect error';
-				resolve({state});
-			}
-		});
-	})
-}
+	async get_metacritic_score(){
 
-async function get_metascore_by_psn_info(psn_info){
-	let meta_info;
-	let search_names = psn_info.m_name ? psn_info.m_name : psn_info.names
-	for(let name of search_names){
-		const platform = get_metacritic_platform_alias(psn_info.platform);			
-		meta_info = await get_metascore_from_storage(platform,filter_char(name));
-		if(meta_info.state !=='not found'){
-			break;
+		if(await this.load_metacritic_name_from_stroage(this.id)){
+			if(this.state==='skip'){
+				return false;
+			}
+			else if (await this.load_metascore_from_storage()){
+				return true;
+			}
 		}
 		else{
-			meta_info = await get_metascore_from_metacritic(platform,filter_char(name));
-		}	
-		if(meta_info.state ==='success'){
-			save_metascore_to_storage(meta_info,true);
-			break;
+			let psn = new Psn_info(this.host,this.locale,this.id);
+			await psn.get_game_info();
+			if (psn.is_en === false){
+				await psn.use_us_store_id();
+			}
+
+			if(psn.state==='ok'){
+				this.meta_name = [...psn.names];
+				this.platform = psn.platform;
+			}	
+		}
+		
+		for(let name of this.meta_name){
+			if(await this.get_metascore_from_metacritic(this.filter_char(name))){
+				this.save_metascore_to_storage(this.filter_char(name),true);
+				this.save_metacritic_name_to_storage(this.id,this.filter_char(name));
+				break;
+			}
+		}
+
+		if(this.state !== 'ok'){
+			this.set_skip_time_to_storage(this.id,1);
+			return false;
+		}
+
+		return true;
+	}
+
+	get_metacritic_platform_alias(name){
+		const platform_list = {
+			'ps4':'playstation-4',
+			'ps3':'playstation-3',
+			'ps2':'playstation-2',
+			'ps':'playstation',
+			'psvita':'playstation-vita',
+			'psp':'psp'
+			};
+		
+		if(name in platform_list){
+			return platform_list[name];
 		}
 	}
-	if(meta_info.state === 'expired'){
-		meta_info = await get_metascore_from_metacritic(meta_info.platform,meta_info.name);
-		save_metascore_to_storage(meta_info,true);
-	}
-
-	if(meta_info.state ==='connect error'){
-		meta_info.platform = psn_info.platform;
-		meta_info.name = psn_info.names[0];
-		save_metascore_to_storage(meta_info,false);
-	}
-
-	return meta_info;
 }
-
-async function get_metacritic_score(host,locale,psn_id,use_us_info=false){
-	let search_id = psn_id;
-	let search_locale = locale;
-	let psn_info ={};
-	let meta_info ={};
-	if(use_us_info){
-		const us_store_page = await get_us_store_id(psn_id);
-		if(us_store_page.state ==='success'){
-			search_id = us_store_page.id;
-			search_locale = 'en-us';
-		}
-		else{
-			meta_info.state = 'connect error';
-			return meta_info;
-		}
-	}
-
-	psn_info = await get_game_info_by_psn_id(host,search_locale,search_id);
-	
-	if(psn_info.state === 'success' || psn_info.m_name){
-		meta_info = await get_metascore_by_psn_info(psn_info);
-	}
-	else{
-		meta_info.state = 'connect error';
-	}
-
-	if(meta_info.state ==='success'){
-		set_game_info_to_storage(psn_id,{m_name:[meta_info.name]});
-	}
-
-	return meta_info;
-}
-
-function get_metacritic_platform_alias(name){
-	const platform_list = {
-		'ps4':'playstation-4',
-		'ps3':'playstation-3',
-		'ps2':'playstation-2',
-		'ps':'playstation',
-		'psvita':'playstation-vita',
-		'psp':'psp'
-		};
-	
-	if(name in platform_list){
-		return platform_list[name];
-	}
-}
-
 
 
 

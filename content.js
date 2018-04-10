@@ -6,6 +6,13 @@ function increase_height(target,incresement){
 	}
 }
 
+function create_link(link){
+	const insert_link = document.createElement('a');
+	insert_link.setAttribute('href', link);
+	insert_link.setAttribute('target','_blank');
+	return insert_link;
+}
+
 function insert_meta_score(node,score){
 	const insert_span = document.createElement('span');
 	if(score==='tbd'){
@@ -19,7 +26,7 @@ function insert_meta_score(node,score){
 	}
 	else 
 		insert_span.className='metascore_w negtive';
-	insert_span.innerHTML= score;
+	insert_span.textContent= score;
 	node.appendChild(insert_span);
 }
 
@@ -36,13 +43,16 @@ function insert_user_score(node,score){
 	}
 	else 
 		insert_span.className='metascore_w user negtive';
-	insert_span.innerHTML= score;
+	insert_span.textContent= score;
 	node.appendChild(insert_span);
 }
 
 function insert_detail_page_meta_score(node,score,count,url){
 	const insert_span = document.createElement('span');
 	const insert_div = document.createElement('div');
+	const insert_link = create_link(url);
+	const insert_meta_title = document.createElement('div');
+	const insert_meta_count = document.createElement('div');
 	if(score==='tbd'){
 		insert_span.className='metascore_w tbd large';
 	}
@@ -54,16 +64,27 @@ function insert_detail_page_meta_score(node,score,count,url){
 	}
 	else 
 		insert_span.className='metascore_w negtive large';
+
 	insert_div.className ='detail_metascore_text small';
-	insert_span.innerHTML= score;
-	insert_div.innerHTML = `<a href="${url}" target="_blank"><div class="detail_metascore_title">MetaScore</div><div>${count} critics</div></a>`
+	insert_meta_title.className='detail_metascore_title';
+	insert_span.textContent= score;
+	insert_meta_title.textContent='MetaScore';
+	insert_meta_count.textContent=`${count} critics`;
+	insert_link.appendChild(insert_meta_title);
+	insert_link.appendChild(insert_meta_count);
+	insert_div.appendChild(insert_link);
 	node.appendChild(insert_span);
 	node.appendChild(insert_div);
+	
 }
 
 function insert_detail_page_user_score(node,score,count,url){
 	const insert_span = document.createElement('span');
 	const insert_div = document.createElement('div');
+	const insert_link = create_link(url);
+	const insert_score_title = document.createElement('div');
+	const insert_score_count = document.createElement('div');
+
 	if(score==='tbd'){
 		insert_span.className='metascore_w user tbd large';
 	}
@@ -75,9 +96,15 @@ function insert_detail_page_user_score(node,score,count,url){
 	}
 	else 
 		insert_span.className='metascore_w user negtive large';
+
 	insert_div.className ='detail_metascore_text small';
-	insert_span.innerHTML = score;
-	insert_div.innerHTML = `<a href="${url}" target="_blank"><div class="detail_metascore_title">MetaCritic user score</div><div>${count} ratings</div></a>`;
+	insert_score_title.className='detail_metascore_title';
+	insert_span.textContent = score;
+	insert_score_title.textContent='MetaCritic user score';
+	insert_score_count.textContent=`${count} ratings`;
+	insert_link.appendChild(insert_score_title);
+	insert_link.appendChild(insert_score_count);
+	insert_div.appendChild(insert_link);
 	node.appendChild(insert_span);
 	node.appendChild(insert_div);
 }
@@ -111,16 +138,13 @@ async function inject_game_list(){
 			increase_height(infoplane,insert_div.offsetHeight);
 			increase_height(out_box,insert_div.offsetHeight);
 			document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')
-			let response = await get_metacritic_score(window.location.host,locale,psn_id);
-			if(response.state ==='connect error'){
-				response = await get_metacritic_score(window.location.host,locale,psn_id,true);
-			}	
-			if(response.state ==='success'){
-				insert_meta_score(insert_div,response.meta_score);
+			let meta= new MetaInfo(window.location.host,locale,psn_id);
+			if(await meta.get_metacritic_score()){
+				insert_meta_score(insert_div,meta.meta_score);
 				const insert_span = document.createElement('span');
-				insert_span.innerHTML= '|';
+				insert_span.textContent= '|';
 				insert_div.appendChild(insert_span);
-				insert_user_score(insert_div,response.user_score);	
+				insert_user_score(insert_div,meta.user_score);	
 			}
 		}
 	})
@@ -138,18 +162,14 @@ async function inject_detail_page(){
 		insert_div.id = 'detail-meta-score';
 		insert_user_div.id = 'detail-user-score';
 		sku_info.parentNode.insertBefore(insert_div,sku_info.nextSibling);
-		sku_info.parentNode.insertBefore(insert_user_div,insert_div.nextSibling);		
-		let response = await get_metacritic_score(window.location.host,locale,psn_id);
-		if(response.state ==='connect error'){
-			response = await get_metacritic_score(window.location.host,locale,psn_id,true);
-		}	
-		if(response.state ==='success'){
-			const url = `http://www.metacritic.com/game/${response.platform}/${response.name}`;
+		sku_info.parentNode.insertBefore(insert_user_div,insert_div.nextSibling);
+		let meta= new MetaInfo(window.location.host,locale,psn_id);		
+		if (await meta.get_metacritic_score()){
 			insert_div.className='detail_metascore_container';
-			insert_detail_page_meta_score(insert_div,response.meta_score,response.meta_count,url);				
-			if(response.user_score!=='tbd'){
+			insert_detail_page_meta_score(insert_div,meta.meta_score,meta.meta_count,meta.url);				
+			if(meta.user_score!=='tbd'){
 				insert_user_div.className='detail_metascore_container';				
-				insert_detail_page_user_score(insert_user_div,response.user_score,response.user_count,url);	
+				insert_detail_page_user_score(insert_user_div,meta.user_score,meta.user_count,meta.url);	
 			}
 		}
 
@@ -187,7 +207,7 @@ const locale = document.URL.split('/')[3];
 
 const observer = new MutationObserver( mutations=> {
 	inject_detail_page();
-	inject_discount_info_detail_page();
+	//inject_discount_info_detail_page();
 	inject_game_list();
 });
 
