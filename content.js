@@ -113,9 +113,13 @@ function insert_detail_page_discount(node,low_price,low_plus_price,url){
 	const title = document.createElement('p');
 	const price = document.createElement('p');
 	const divider = document.createElement('hr');
-	title.innerHTML=`Lowest price:`;
-	price.innerHTML=`<a href="${url}" target="_blank"><span> ${low_price}  </span>/<span>  ${low_plus_price}</span>(PS+)</a>`;
+	const price_link = create_link(url);
+	const span_low_price = document.createElement('span');
+	title.textContent='Lowest price:';
+	span_low_price.textContent = `${low_price} / ${low_plus_price}(PS+)`;
 	divider.className='sku-info__divider';
+	price_link.appendChild(span_low_price);
+	price.appendChild(price_link);
 	node.appendChild(title);
 	node.appendChild(price);
 	node.appendChild(divider);
@@ -185,10 +189,10 @@ async function inject_discount_info_detail_page(){
 		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');
 		sku_info.insertBefore(insert_low_price,playable);
 		insert_low_price.id='detail-discount';
-		let response = await get_lowest_price(window.location.host,locale,psn_id);
-		if(response.state ==='success'){
+		let dicount = new Discount(window.location.host,locale,psn_id);
+		if(await dicount.get_lowest_price()){
 			insert_low_price.className = 'discount_container';
-			insert_detail_page_discount(insert_low_price,response.low_price,response.low_plus_price,response.url);
+			insert_detail_page_discount(insert_low_price,dicount.low_price,dicount.low_plus_price,dicount.url);
 		}	
 	}
 }
@@ -207,7 +211,7 @@ const locale = document.URL.split('/')[3];
 
 const observer = new MutationObserver( mutations=> {
 	inject_detail_page();
-	//inject_discount_info_detail_page();
+	inject_discount_info_detail_page();
 	inject_game_list();
 });
 
