@@ -15,6 +15,8 @@ see [Chrome web store](https://chrome.google.com/webstore/detail/ps-store-helper
  Slovakia, Slovenia, South Africa, Sweden, Taiwan, Thailand, Turkey, United Arab Emirates
  
 # Change Log:
+## [1.1.5]
+- modify search regular-expression 
 ## [1.1.4]
 - fix lowest price does not update correctly
 ## [1.1.3]
