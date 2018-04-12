@@ -28,18 +28,18 @@ class MetaInfo{
 		}		
 	}
 
-	save_metacritic_name_to_storage(key,name){
+	async save_metacritic_name_to_storage(key,name){
 		const data ={m_name:name};
-		return Utility.set_data(key,data);
+		return await Utility.set_data(key,data);
 	}
 
-	set_skip_time_to_storage(key,days){
+	async set_skip_time_to_storage(key,days){
 		const date = Utility.get_expire_date(days);
 		const data ={m_skip_time:date};
-		return Utility.set_data(key,data);
+		return await Utility.set_data(key,data);
 	}
 
-	save_metascore_to_storage(name){
+	async save_metascore_to_storage(name){
 		const key = `${this.platform}/${name}`;
 		let data ={};
 		const expire_date = Utility.get_expire_date(7);
@@ -49,7 +49,7 @@ class MetaInfo{
 		const user_count = this.user_count;
 		data = {meta_score,user_score,meta_count,user_count,expire_date};
 	
-		return Utility.set_data(key,data);
+		return await Utility.set_data(key,data);
 	}
 
 	async load_metascore_from_storage(){
@@ -101,7 +101,7 @@ class MetaInfo{
 						const user_count_obj = doc.querySelector('.feature_userscore > .summary > p > .count > a');
 						this.meta_score = meta_score_obj? meta_score_obj.innerHTML : 'tbd';
 						this.user_score = user_score_obj? user_score_obj.innerHTML : 'tbd';
-						this.meta_count = meta_critic_count_obj? meta_critic_count_obj.innerHTML : '0';
+						this.meta_count = meta_critic_count_obj? meta_critic_count_obj.innerHTML.replace(/\D+/g,'') : '0';
 						this.user_count = user_count_obj ? user_count_obj.innerHTML.replace(/\D+/g,''): '0';
 						this.url = url;
 						this.state = 'ok';				
@@ -145,14 +145,14 @@ class MetaInfo{
 		
 		for(let name of this.meta_name){
 			if(await this.get_metascore_from_metacritic(this.filter_char(name))){
-				this.save_metascore_to_storage(this.filter_char(name),true);
-				this.save_metacritic_name_to_storage(this.id,this.filter_char(name));
+				await this.save_metascore_to_storage(this.filter_char(name),true);
+				await this.save_metacritic_name_to_storage(this.id,this.filter_char(name));
 				break;
 			}
 		}
 
 		if(this.state !== 'ok'){
-			this.set_skip_time_to_storage(this.id,1);
+			await this.set_skip_time_to_storage(this.id,1);
 			return false;
 		}
 

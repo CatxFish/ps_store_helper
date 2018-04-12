@@ -30,12 +30,12 @@ class Discount{
         }	
     }
 
-    save_price_to_storage(key){
+    async save_price_to_storage(key){
         const expire_date = Utility.get_expire_date(1);
         const url = this.url;
         const low_price = this.low_price;
         const low_plus_price = this.low_plus_price;
-        return Utility.set_data(key,{discount:{url,low_price,low_plus_price,expire_date}});
+        return await Utility.set_data(key,{discount:{url,low_price,low_plus_price,expire_date}});
     }
 
    adjust_price(low_price,low_plus_price){
@@ -134,9 +134,50 @@ class Discount{
         }
 
         if(this.state ==='ok'){
-            this.save_price_to_storage(this.id);
+            await this.save_price_to_storage(this.id);
         }
         
         return this.state ==='ok';
+    }
+
+    async is_lowest_price(){
+        if(this.state !=='ok'){
+            if(!await this.load_price_from_storage(this.id)){
+                return 0;
+            }
+        }
+
+        let psn = new Psn_info(this.host,this.locale,this.id);
+        await psn.get_game_info();
+
+        if(psn.state!=='ok'){
+            return 0;
+        }
+        else if (!psn.discount_end_time || Utility.is_expired(psn.discount_end_time)){
+            await psn.get_game_info(true);
+        }
+
+        //{0:not lowest,1:lowest,2:plus lowest,3:both lowest}
+        let ret = 0
+
+        if(this.is_lower(psn.price,psn.plus_price,this.low_plus_price)){
+            ret +=2;
+        }
+        if(this.is_lower(psn.price,psn.discount_price,this.low_price)){
+            ret +=1;
+        }
+
+        return ret;
+    }
+
+    is_lower(default_price,price1,price2){
+        if(!default_price || !price1 || !price2){
+            return false;
+        }
+        const price1_ = price1.replace(/[^0-9\.-]+/g,"");
+        const price2_ =price2.replace(/[^0-9\.-]+/g,"");
+        const default_price_ = default_price.replace(/[^0-9\.-]+/g,"");
+
+        return Number(price1_) < Number(default_price_) && Number(price1_) <= Number(price2_);
     }
 }

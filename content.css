@@ -45,6 +45,31 @@
     padding: .4375em;
 }
 
+.lowest_badge{
+    position: absolute;
+    top: 0em;
+    z-index: 2;
+    height: 18px;
+    font-size: 11px;
+    line-height: 18px;
+    padding: 0 .25em;
+}
+
+.plus_lowest{
+    background-color: #968719;
+    color:#ffffff;
+}
+
+.regular_lowest{
+    background-color: #006cff;
+    color:#ffffff;
+}
+
+.both_lowest{
+    background-color: #cc1d1d;
+    color:#ffffff;
+}
+
 .discount_container{
     font-size: 0.85em!important;
 }

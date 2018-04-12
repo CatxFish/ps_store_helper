@@ -14,14 +14,16 @@ class Utility{
     }
 
     static set_data(key,data){
-        chrome.storage.local.get(key , item =>{
-			if(item && item[key]){
-				const merge_data = Object.assign(item[key],data);
-				chrome.storage.local.set({[key]:merge_data});
-			}
-			else{
-				chrome.storage.local.set({[key]:data});
-			}
+		return new Promise(resolve=>{
+			chrome.storage.local.get(key , item =>{
+				if(item && item[key]){
+					const merge_data = Object.assign(item[key],data);
+					chrome.storage.local.set({[key]:merge_data},()=>{resolve()});
+				}
+				else{
+					chrome.storage.local.set({[key]:data},()=>{resolve()});
+				}
+			})
 		})
 	}
 

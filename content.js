@@ -125,6 +125,21 @@ function insert_detail_page_discount(node,low_price,low_plus_price,url){
 	node.appendChild(divider);
 }
 
+function insert_loweset_badge(node,lowest_state){
+	const div = document.createElement('div');
+	div.textContent='Lowest';
+	if(lowest_state === 1){
+		div.className='lowest_badge regular_lowest';
+	}
+	else if(lowest_state === 2){
+		div.className='lowest_badge plus_lowest';
+	}
+	else if(lowest_state === 3){
+		div.className='lowest_badge both_lowest';
+	}
+	node.appendChild(div);
+}
+
 async function inject_game_list(){
 	let nodelist = [...document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')];
 	let res = nodelist.map(async (node)=>{
@@ -149,6 +164,18 @@ async function inject_game_list(){
 				insert_span.textContent= '|';
 				insert_div.appendChild(insert_span);
 				insert_user_score(insert_div,meta.user_score);	
+			}
+			const discount_badge = node.querySelector('.product-image__discount-badge');
+			if(discount_badge && discount_badge.clientHeight>0){
+				let discount = new Discount(window.location.host,locale,psn_id);
+				if(await discount.get_lowest_price()){
+					lowest_state = await discount.is_lowest_price();
+					if(lowest_state>0){
+						const img_plane = node.querySelector('.product-image')
+						insert_loweset_badge(img_plane,lowest_state);
+					}
+
+				}
 			}
 		}
 	})
