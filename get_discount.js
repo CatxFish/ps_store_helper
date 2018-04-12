@@ -55,7 +55,7 @@ class Discount{
     async search_discount_link(key,page_count){
         
         const page = page_count.toString()
-        const url = `https://psdeals.net/${this.country}-store/all-games/${page}?search=${key}&sort=title-desc`;
+        const url = `https://psdeals.net/${this.country}-store/all-games/${page}?search=${key}&sort=title-desc&type=all`;
         try{
             const response = await fetch(url);  
             if(!response.ok){

@@ -15,6 +15,12 @@ see [Chrome web store](https://chrome.google.com/webstore/detail/ps-store-helper
  Slovakia, Slovenia, South Africa, Sweden, Taiwan, Thailand, Turkey, United Arab Emirates
  
 # Change Log:
+## [1.1.8]
+- fix bug "Game add on does not show lowest price"
+## [1.1.7]
+- add "lowest" notice on game list 
+## [1.1.6]
+- Refactor,delete innerHtml assign.
 ## [1.1.5]
 - modify search regular-expression 
 ## [1.1.4]
