@@ -15,6 +15,8 @@ see [Chrome web store](https://chrome.google.com/webstore/detail/ps-store-helper
  Slovakia, Slovenia, South Africa, Sweden, Taiwan, Thailand, Turkey, United Arab Emirates
  
 # Change Log:
+## [1.1.9]
+- fix bug "Metacritic url is wrong"
 ## [1.1.8]
 - fix bug "Game add on does not show lowest price"
 ## [1.1.7]

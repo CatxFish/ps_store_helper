@@ -23,7 +23,8 @@ class MetaInfo{
 		if (data && data.m_name && data.platform){
 			this.platform = data.platform;
 			this.meta_name.push(data.m_name);
-			this.url = `http://www.metacritic.com/game/${data.platform}/${data.m_name}`;
+			const platform =this.get_metacritic_platform_alias(data.platform);
+			this.url = `http://www.metacritic.com/game/${platform}/${data.m_name}`;
 			return true;
 		}		
 	}
