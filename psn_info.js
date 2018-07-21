@@ -52,6 +52,7 @@ class Psn_info {
 				if(rewards.length >0){
 					this.price = res_json.default_sku.display_price;
 					if(rewards[0].isPlus){
+						this.discount_price = '';
 						this.plus_price = rewards[0].display_price ? rewards[0].display_price :'';
 					}
 					else{					
