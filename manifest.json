@@ -1,12 +1,12 @@
 {
     "name": "PS Store Helper",
-    "version": "1.1.10",
+    "version": "1.1.11",
     "background": {
         "scripts": ["background.js"]
     },
     "permissions": [
         "https://store.playstation.com/*",
-        "http://www.metacritic.com/*",
+        "https://www.metacritic.com/*",
         "https://psdeals.net/*",
 		"tabs",
 		"storage"

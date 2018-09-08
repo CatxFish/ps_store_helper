@@ -89,7 +89,7 @@ class MetaInfo{
 		return new Promise(resolve =>{	
 			const action ='fetch_http';
 			const platform = this.get_metacritic_platform_alias(this.platform);
-			const url = `http://www.metacritic.com/game/${platform}/${name}`;
+			const url = `https://www.metacritic.com/game/${platform}/${name}`;
 			chrome.runtime.sendMessage({action,url},response =>{
 				this.state ='fetching metacritic';
 				if(response.state ==='ok'){
