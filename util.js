@@ -41,4 +41,13 @@ class Utility {
     const expire_day = `${mm}/${dd}/${yy}`;
     return expire_day;
   }
+
+  static back_fetch(url){
+    return new Promise(resolve => {
+    const action = 'fetch_http';
+    chrome.runtime.sendMessage({ action, url }, response => {
+        resolve(response);
+      })
+    })
+  }
 }

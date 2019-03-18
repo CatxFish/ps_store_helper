@@ -86,39 +86,35 @@ class MetaInfo {
   }
 
   async get_metascore_from_metacritic(name) {
-    return new Promise(resolve => {
-      const action = 'fetch_http';
-      const platform = this.get_metacritic_platform_alias(this.platform);
-      const url = `https://www.metacritic.com/game/${platform}/${name}`;
-      chrome.runtime.sendMessage({ action, url }, response => {
-        this.state = 'fetching metacritic';
-        if (response.state === 'ok') {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(response.content, "text/html");
-          if (doc.querySelector('div.section.product_scores')) {
-            const meta_score_obj = doc.querySelector('span[itemprop=ratingValue]');
-            const user_score_obj = doc.querySelector('div.metascore_w.user');
-            const meta_critic_count_obj = doc.querySelector('.highlight_metascore > .summary > p > .count > a');
-            const user_count_obj = doc.querySelector('.feature_userscore > .summary > p > .count > a');
-            this.meta_score = meta_score_obj ? meta_score_obj.innerHTML : 'tbd';
-            this.user_score = user_score_obj ? user_score_obj.innerHTML : 'tbd';
-            this.meta_count = meta_critic_count_obj ? meta_critic_count_obj.innerHTML.replace(/\D+/g, '') : '0';
-            this.user_count = user_count_obj ? user_count_obj.innerHTML.replace(/\D+/g, '') : '0';
-            this.url = url;
-            this.state = 'ok';
-            resolve(true);
-          }
-          else {
-            this.state = 'connect error';
-            resolve(false);
-          }
-        }
-        else {
-          this.state = 'connect error';
-          resolve(false);
-        }
-      });
-    })
+    const platform = this.get_metacritic_platform_alias(this.platform);
+    const url = `https://www.metacritic.com/game/${platform}/${name}`;
+    this.state = 'fetching metacritic';
+    const response = await Utility.back_fetch(url);
+    if (response.state === 'ok') {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(response.content, "text/html");
+      if (doc.querySelector('div.section.product_scores')) {
+        const meta_score_obj = doc.querySelector('span[itemprop=ratingValue]');
+        const user_score_obj = doc.querySelector('div.metascore_w.user');
+        const meta_critic_count_obj = doc.querySelector('.highlight_metascore > .summary > p > .count > a');
+        const user_count_obj = doc.querySelector('.feature_userscore > .summary > p > .count > a');
+        this.meta_score = meta_score_obj ? meta_score_obj.innerHTML : 'tbd';
+        this.user_score = user_score_obj ? user_score_obj.innerHTML : 'tbd';
+        this.meta_count = meta_critic_count_obj ? meta_critic_count_obj.innerHTML.replace(/\D+/g, '') : '0';
+        this.user_count = user_count_obj ? user_count_obj.innerHTML.replace(/\D+/g, '') : '0';
+        this.url = url;
+        this.state = 'ok';
+        return true;
+      }
+      else {
+        this.state = 'connect error';
+        return false;
+      }
+    }
+    else {
+      this.state = 'connect error';
+      return false;
+    }
   }
 
   async get_metacritic_score() {

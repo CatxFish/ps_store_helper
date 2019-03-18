@@ -53,16 +53,15 @@ class Discount {
   }
 
   async search_discount_link(key, page_count) {
-
     const page = page_count.toString()
     const url = `https://psdeals.net/${this.country}-store/all-games/${page}?search=${key}&sort=title-desc&type=all`;
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
+      const response = await Utility.back_fetch(url);
+      if (response.state !== 'ok') {
         throw 'connect error';
       }
       const parser = new DOMParser();
-      const doc = parser.parseFromString(await response.text(), "text/html");
+      const doc = parser.parseFromString(response.content, "text/html");
       const results = doc.querySelectorAll('.game-collection-item-link');
       for (let link of results) {
         const image_obj = link.querySelector('.game-collection-item-image');
@@ -90,10 +89,10 @@ class Discount {
   }
 
   async fetch_discount_page(url) {
-    const response = await fetch(url);
-    if (response.ok) {
+    const response = await Utility.back_fetch(url);
+    if (response.state === 'ok') {
       const parser = new DOMParser();
-      const doc = parser.parseFromString(await response.text(), "text/html");
+      const doc = parser.parseFromString(response.content, "text/html");
       const low_price_div = doc.querySelector('span.game-stats-col-number-green');
       const low_plus_div = doc.querySelector('span.game-stats-col-number-yellow');
       const low_price = low_price_div ? low_price_div.innerHTML : '';
