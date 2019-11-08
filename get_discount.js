@@ -65,7 +65,7 @@ class Discount {
       const results = doc.querySelectorAll('.game-collection-item-link');
       for (let link of results) {
         const image_obj = link.querySelector('.game-collection-item-image');
-        const image_id = image_obj ? image_obj.src.split('/')[11] : '';
+        const image_id = image_obj && image_obj.dataset? image_obj.dataset.src.split('/')[11] : '';
         if (image_id && image_id === this.id) {
           const re = new RegExp(`https://${this.host}`, 'g');
           const pathname = link.href.replace(re, '');
