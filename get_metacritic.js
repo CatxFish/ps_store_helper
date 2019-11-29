@@ -94,7 +94,7 @@ class MetaInfo {
       const parser = new DOMParser();
       const doc = parser.parseFromString(response.content, "text/html");
       if (doc.querySelector('div.section.product_scores')) {
-        const meta_score_obj = doc.querySelector('span[itemprop=ratingValue]');
+        const meta_score_obj = doc.querySelector('div.metascore_w.xlarge.game >span');
         const user_score_obj = doc.querySelector('div.metascore_w.user');
         const meta_critic_count_obj = doc.querySelector('.highlight_metascore > .summary > p > .count > a');
         const user_count_obj = doc.querySelector('.feature_userscore > .summary > p > .count > a');
