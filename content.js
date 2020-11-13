@@ -141,6 +141,7 @@ function insert_loweset_badge(node,lowest_state){
 }
 
 async function inject_game_list(){
+	console.log("inject_game_list");
 	let nodelist = [...document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')];
 	let res = nodelist.map(async (node)=>{
 		if(!node.querySelector('.metascore_container')){
@@ -182,7 +183,9 @@ async function inject_game_list(){
 }
 
 async function inject_detail_page(){
-	const sku_info = document.querySelector('div.sku-info');
+	console.log("inject_detail_page");
+	//const sku_info = document.querySelector('div.sku-info');
+	const sku_info = document.querySelector('[data-qa="mfe-game-title#name"]');
 	const meta_div = document.querySelector('#detail-meta-score');
 	const user_div = document.querySelector('#detail-user-score');
 
@@ -208,6 +211,7 @@ async function inject_detail_page(){
 }
 
 async function inject_discount_info_detail_page(){
+	console.log("inject_discount_info_detail_page");
 	const sku_info = document.querySelector('div.sku-info');
 	const discount_div = document.querySelector('#detail-discount');
 	if(sku_info && !discount_div){
@@ -243,8 +247,11 @@ const observer = new MutationObserver( mutations=> {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, callback) =>{
+	console.log("onMessage addListener", request.action);
 	if (request.action === 'inject_metacritic'){
-		const target = document.querySelector('.application-container');
+		console.log("Inject Metacritic");
+		//const target = document.querySelector('.application-container');
+		const target = document.querySelector('.pdp-game-title');
 		const config = { attributes: true, childList: true, characterData: true ,subtree: true};
 		observer.observe(target, config);
 		if(document.URL !== last_inject_url){
