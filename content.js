@@ -142,43 +142,56 @@ function insert_loweset_badge(node,lowest_state){
 
 async function inject_game_list(){
 	let nodelist = [...document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')];
-	let res = nodelist.map(async (node)=>{
-		if(!node.querySelector('.metascore_container')){
-			const infoplane = node.querySelector('.grid-cell__body');
-			const out_box = node.querySelector('.grid-cell');
-			const insert_div = document.createElement('div');
-			const infoplane_bot = infoplane.querySelector('.grid-cell__bottom');
-			const infoplane_parent = infoplane_bot.parentNode;
-			const psn_link = infoplane.querySelector('a');
-			const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
-			insert_div.className='metascore_container';
-			infoplane_parent.insertBefore(insert_div,infoplane_bot);
-			increase_height(node,insert_div.offsetHeight);
-			increase_height(infoplane,insert_div.offsetHeight);
-			increase_height(out_box,insert_div.offsetHeight);
-			document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')
-			let meta= new MetaInfo(window.location.host,locale,psn_id);
-			if(await meta.get_metacritic_score()){
-				insert_meta_score(insert_div,meta.meta_score);
-				const insert_span = document.createElement('span');
-				insert_span.textContent= '|';
-				insert_div.appendChild(insert_span);
-				insert_user_score(insert_div,meta.user_score);	
-			}
-			const discount_badge = node.querySelector('.product-image__discount-badge');
-			if(discount_badge && discount_badge.clientHeight>0){
-				let discount = new Discount(window.location.host,locale,psn_id);
-				if(await discount.get_lowest_price()){
-					lowest_state = await discount.is_lowest_price();
-					if(lowest_state>0){
-						const img_plane = node.querySelector('.product-image')
-						insert_loweset_badge(img_plane,lowest_state);
-					}
+	let k = Math.ceil(nodelist.length/5)
+	for(i=0; i<k; i++)
+	{
+		start = i*5
+		if(i == k-1)
+			end = nodelist.length%5
+		else
+			end = (i+1)*5
+		
+		updatelist = nodelist.slice(start,end)
 
+
+		let res = await Promise.all(updatelist.map(async (node)=>{
+			if(!node.querySelector('.metascore_container')){
+				const infoplane = node.querySelector('.grid-cell__body');
+				const out_box = node.querySelector('.grid-cell');
+				const insert_div = document.createElement('div');
+				const infoplane_bot = infoplane.querySelector('.grid-cell__bottom');
+				const infoplane_parent = infoplane_bot.parentNode;
+				const psn_link = infoplane.querySelector('a');
+				const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
+				insert_div.className='metascore_container';
+				infoplane_parent.insertBefore(insert_div,infoplane_bot);
+				increase_height(node,insert_div.offsetHeight);
+				increase_height(infoplane,insert_div.offsetHeight);
+				increase_height(out_box,insert_div.offsetHeight);
+				document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')
+				let meta= new MetaInfo(window.location.host,locale,psn_id);
+				if(await meta.get_metacritic_score()){
+					insert_meta_score(insert_div,meta.meta_score);
+					const insert_span = document.createElement('span');
+					insert_span.textContent= '|';
+					insert_div.appendChild(insert_span);
+					insert_user_score(insert_div,meta.user_score);	
+				}
+				const discount_badge = node.querySelector('.product-image__discount-badge');
+				if(discount_badge && discount_badge.clientHeight>0){
+					let discount = new Discount(window.location.host,locale,psn_id);
+					if(await discount.get_lowest_price()){
+						lowest_state = await discount.is_lowest_price();
+						if(lowest_state>0){
+							const img_plane = node.querySelector('.product-image')
+							insert_loweset_badge(img_plane,lowest_state);
+						}
+
+					}
 				}
 			}
-		}
-	})
+		}))
+	}
 }
 
 async function inject_detail_page(){
