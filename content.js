@@ -251,8 +251,9 @@ chrome.runtime.onMessage.addListener((request, sender, callback) =>{
 	if (request.action === 'inject_metacritic'){
 		console.log("Inject Metacritic");
 		//const target = document.querySelector('.application-container');
-		const target = document.querySelector('main');
+		const target = document.querySelector('body');
 		const config = { attributes: true, childList: true, characterData: true ,subtree: true};
+		console.log("observing with target", target, "and config", config);
 		observer.observe(target, config);
 		if(document.URL !== last_inject_url){
 			clear_inject();
