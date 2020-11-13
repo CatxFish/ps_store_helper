@@ -251,7 +251,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) =>{
 	if (request.action === 'inject_metacritic'){
 		console.log("Inject Metacritic");
 		//const target = document.querySelector('.application-container');
-		const target = document.querySelector('.pdp-game-title');
+		const target = document.querySelector('main');
 		const config = { attributes: true, childList: true, characterData: true ,subtree: true};
 		observer.observe(target, config);
 		if(document.URL !== last_inject_url){
