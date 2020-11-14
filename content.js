@@ -147,16 +147,17 @@ async function inject_game_list(){
 	let nodelist = [...document.querySelectorAll('[data-qa="ems-sdk-product-tile"]')];
 	let res = nodelist.map(async (node)=>{
 	//	console.log("Processing node", node);
-		if(!node.querySelector('.metascore_container') && node.getAttribute("data-qa-index") == "0"){
+		if(!node.querySelector('.metascore_container') && node.getAttribute("data-qa-index") == "1"){
 			console.log("Node missing metascore", node);
 			//const infoplane = node.querySelector('.grid-cell__body');
-			const infoplane = node;
+			const infoplane = node.querySelector('section');
+			//const infoplane = node;
 			//const out_box = node.querySelector('.grid-cell');
 			const insert_div = document.createElement('div');
 			//const infoplane_bot = infoplane.querySelector('.grid-cell__bottom');
 			//const infoplane_bot = node.querySelector('div.price__container');
 			//const infoplane_parent = infoplane_bot.parentNode;
-			const psn_link = infoplane.querySelector('a');
+			const psn_link = node.querySelector('a');
 			const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
 			insert_div.className='metascore_container';
 			infoplane.appendChild(insert_div);
