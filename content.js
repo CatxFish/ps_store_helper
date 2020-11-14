@@ -150,6 +150,7 @@ async function inject_game_list(){
 			const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
 			insert_div.className='metascore_container';
 			infoplane.appendChild(insert_div);
+			increase_height(node,insert_div.offsetHeight);
 			let meta= new MetaInfo(window.location.host,locale,psn_id);
 			if(await meta.get_metacritic_score()){
 				insert_meta_score(insert_div,meta.meta_score);
