@@ -54,9 +54,11 @@ class Discount {
 
   async search_discount_link(key, page_count) {
     const page = page_count.toString()
-    const url = `https://psdeals.net/${this.country}-store/all-games/${page}?search=${key}&sort=title-desc&type=all`;
+    //const url = `https://psdeals.net/${this.country}-store/all-games/${page}?search=${key}&sort=title-desc&type=all`;
+    const url = `https://psdeals.net/${this.country}-store/search?search_query=${key}&sort=title-desc&type=all`;
     try {
       const response = await Utility.back_fetch(url);
+      console.log("Fetching", url);
       if (response.state !== 'ok') {
         throw 'connect error';
       }
