@@ -147,7 +147,7 @@ async function inject_game_list(){
 	let nodelist = [...document.querySelectorAll('[data-qa="ems-sdk-product-tile"]')];
 	let res = nodelist.map(async (node)=>{
 	//	console.log("Processing node", node);
-		if(!node.querySelector('.metascore_container') && node.getAttribute("data-qa-index") == "1"){
+		if(!node.querySelector('.metascore_container')){
 			console.log("Node missing metascore", node);
 			//const infoplane = node.querySelector('.grid-cell__body');
 			const infoplane = node.querySelector('section');
@@ -200,13 +200,16 @@ async function inject_detail_page(){
 	const user_div = document.querySelector('#detail-user-score');
 
 	if(sku_info && !meta_div && !user_div){
+		console.log("Adding metacritic to node", sku_info);
 		const insert_div = document.createElement('div');
 		const insert_user_div = document.createElement('div');
 		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');		
 		insert_div.id = 'detail-meta-score';
 		insert_user_div.id = 'detail-user-score';
-		sku_info.parentNode.insertBefore(insert_div,sku_info.nextSibling);
-		sku_info.parentNode.insertBefore(insert_user_div,insert_div.nextSibling);
+		//sku_info.parentNode.insertBefore(insert_div,sku_info.nextSibling);
+		sku_info.parentNode.appendChild(insert_div);
+		//sku_info.parentNode.insertBefore(insert_user_div,insert_div.nextSibling);
+		sku_info.parentNode.appendChild(insert_user_div);
 		let meta= new MetaInfo(window.location.host,locale,psn_id);		
 		if (await meta.get_metacritic_score()){
 			insert_div.className='detail_metascore_container';
