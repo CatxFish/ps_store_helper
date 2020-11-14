@@ -14,6 +14,7 @@ function create_link(link){
 }
 
 function insert_meta_score(node,score){
+	console.log("insert_meta_score");
 	const insert_span = document.createElement('span');
 	if(score==='tbd'){
 		insert_span.className='metascore_w tbd';
@@ -142,24 +143,32 @@ function insert_loweset_badge(node,lowest_state){
 
 async function inject_game_list(){
 	console.log("inject_game_list");
-	let nodelist = [...document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')];
+	//let nodelist = [...document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')];
+	let nodelist = [...document.querySelectorAll('[data-qa="ems-sdk-product-tile"]')];
 	let res = nodelist.map(async (node)=>{
-		if(!node.querySelector('.metascore_container')){
-			const infoplane = node.querySelector('.grid-cell__body');
-			const out_box = node.querySelector('.grid-cell');
+	//	console.log("Processing node", node);
+		if(!node.querySelector('.metascore_container') && node.getAttribute("data-qa-index") == "0"){
+			console.log("Node missing metascore", node);
+			//const infoplane = node.querySelector('.grid-cell__body');
+			const infoplane = node;
+			//const out_box = node.querySelector('.grid-cell');
 			const insert_div = document.createElement('div');
-			const infoplane_bot = infoplane.querySelector('.grid-cell__bottom');
-			const infoplane_parent = infoplane_bot.parentNode;
+			//const infoplane_bot = infoplane.querySelector('.grid-cell__bottom');
+			//const infoplane_bot = node.querySelector('div.price__container');
+			//const infoplane_parent = infoplane_bot.parentNode;
 			const psn_link = infoplane.querySelector('a');
 			const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
 			insert_div.className='metascore_container';
-			infoplane_parent.insertBefore(insert_div,infoplane_bot);
-			increase_height(node,insert_div.offsetHeight);
-			increase_height(infoplane,insert_div.offsetHeight);
-			increase_height(out_box,insert_div.offsetHeight);
-			document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')
+			infoplane.appendChild(insert_div);
+			console.log("Appended ", insert_div, "to parent", infoplane);
+			//infoplane_parent.insertBefore(insert_div,infoplane_bot);
+			//increase_height(node,insert_div.offsetHeight);
+			//increase_height(infoplane,insert_div.offsetHeight);
+			//increase_height(out_box,insert_div.offsetHeight);
+			//document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')
 			let meta= new MetaInfo(window.location.host,locale,psn_id);
 			if(await meta.get_metacritic_score()){
+				console.log("Metascore acquired for node", node);
 				insert_meta_score(insert_div,meta.meta_score);
 				const insert_span = document.createElement('span');
 				insert_span.textContent= '|';
