@@ -201,13 +201,12 @@ async function inject_detail_page(){
 }
 
 async function inject_discount_info_detail_page(){
-	const sku_info = document.querySelector('div.sku-info');
+	const sku_info = document.querySelector('[data-qa="mfe-game-title#name"]');
 	const discount_div = document.querySelector('#detail-discount');
 	if(sku_info && !discount_div){
 		const insert_low_price = document.createElement('div');
-		const playable = sku_info.querySelector('.playable-on');
 		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');
-		sku_info.insertBefore(insert_low_price,playable);
+		sku_info.parentNode.appendChild(insert_low_price);
 		insert_low_price.id='detail-discount';
 		let dicount = new Discount(window.location.host,locale,psn_id);
 		if(await dicount.get_lowest_price()){
