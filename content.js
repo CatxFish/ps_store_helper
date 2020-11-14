@@ -14,7 +14,6 @@ function create_link(link){
 }
 
 function insert_meta_score(node,score){
-	console.log("insert_meta_score");
 	const insert_span = document.createElement('span');
 	if(score==='tbd'){
 		insert_span.className='metascore_w tbd';
@@ -142,34 +141,17 @@ function insert_loweset_badge(node,lowest_state){
 }
 
 async function inject_game_list(){
-	console.log("inject_game_list");
-	//let nodelist = [...document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')];
-	let nodelist = [...document.querySelectorAll('[data-qa="ems-sdk-product-tile"]')];
+	let nodelist = [...document.querySelectorAll('[data-qa="ems-sdk-product-tile"]')]; // get all elements with data-qa=ems-sdk-product-tile
 	let res = nodelist.map(async (node)=>{
-	//	console.log("Processing node", node);
 		if(!node.querySelector('.metascore_container')){
-			console.log("Node missing metascore", node);
-			//const infoplane = node.querySelector('.grid-cell__body');
 			const infoplane = node.querySelector('section');
-			//const infoplane = node;
-			//const out_box = node.querySelector('.grid-cell');
 			const insert_div = document.createElement('div');
-			//const infoplane_bot = infoplane.querySelector('.grid-cell__bottom');
-			//const infoplane_bot = node.querySelector('div.price__container');
-			//const infoplane_parent = infoplane_bot.parentNode;
 			const psn_link = node.querySelector('a');
 			const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
 			insert_div.className='metascore_container';
 			infoplane.appendChild(insert_div);
-			console.log("Appended ", insert_div, "to parent", infoplane);
-			//infoplane_parent.insertBefore(insert_div,infoplane_bot);
-			//increase_height(node,insert_div.offsetHeight);
-			//increase_height(infoplane,insert_div.offsetHeight);
-			//increase_height(out_box,insert_div.offsetHeight);
-			//document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')
 			let meta= new MetaInfo(window.location.host,locale,psn_id);
 			if(await meta.get_metacritic_score()){
-				console.log("Metascore acquired for node", node);
 				insert_meta_score(insert_div,meta.meta_score);
 				const insert_span = document.createElement('span');
 				insert_span.textContent= '|';
@@ -193,22 +175,17 @@ async function inject_game_list(){
 }
 
 async function inject_detail_page(){
-	console.log("inject_detail_page");
-	//const sku_info = document.querySelector('div.sku-info');
 	const sku_info = document.querySelector('[data-qa="mfe-game-title#name"]');
 	const meta_div = document.querySelector('#detail-meta-score');
 	const user_div = document.querySelector('#detail-user-score');
 
 	if(sku_info && !meta_div && !user_div){
-		console.log("Adding metacritic to node", sku_info);
 		const insert_div = document.createElement('div');
 		const insert_user_div = document.createElement('div');
 		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');		
 		insert_div.id = 'detail-meta-score';
 		insert_user_div.id = 'detail-user-score';
-		//sku_info.parentNode.insertBefore(insert_div,sku_info.nextSibling);
 		sku_info.parentNode.appendChild(insert_div);
-		//sku_info.parentNode.insertBefore(insert_user_div,insert_div.nextSibling);
 		sku_info.parentNode.appendChild(insert_user_div);
 		let meta= new MetaInfo(window.location.host,locale,psn_id);		
 		if (await meta.get_metacritic_score()){
@@ -224,7 +201,6 @@ async function inject_detail_page(){
 }
 
 async function inject_discount_info_detail_page(){
-	console.log("inject_discount_info_detail_page");
 	const sku_info = document.querySelector('div.sku-info');
 	const discount_div = document.querySelector('#detail-discount');
 	if(sku_info && !discount_div){
@@ -260,13 +236,9 @@ const observer = new MutationObserver( mutations=> {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, callback) =>{
-	console.log("onMessage addListener", request.action);
 	if (request.action === 'inject_metacritic'){
-		console.log("Inject Metacritic");
-		//const target = document.querySelector('.application-container');
 		const target = document.querySelector('body');
 		const config = { attributes: true, childList: true, characterData: true ,subtree: true};
-		console.log("observing with target", target, "and config", config);
 		observer.observe(target, config);
 		if(document.URL !== last_inject_url){
 			clear_inject();
