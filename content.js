@@ -53,30 +53,23 @@ function insert_detail_page_meta_score(node,score,count,url){
 	const insert_link = create_link(url);
 	insert_link.className += ' psw-link psw-standard-link';
 	const insert_meta_title = document.createElement('div');
-	const insert_meta_count = document.createElement('div');
 	if(score==='tbd'){
 		insert_span.className='metascore_w tbd large';
-	}
-	else if(score >= 75){
+	} else if(score >= 75){
 		insert_span.className='metascore_w positive large';
-	}
-	else if(score >= 50){
+	} else if(score >= 50){
 		insert_span.className='metascore_w mixed large';
-	}
-	else 
+	} else {
 		insert_span.className='metascore_w negtive large';
-
+	}
 	insert_div.className ='detail_metascore_text small';
 	insert_meta_title.className='detail_metascore_title';
 	insert_span.textContent= score;
-	insert_meta_title.textContent='MetaScore';
-	insert_meta_count.textContent=` (${count} critics)`;
+	insert_meta_title.textContent=`MetaScore (${count} critics)`;
 	insert_link.appendChild(insert_meta_title);
-	insert_link.appendChild(insert_meta_count);
 	insert_div.appendChild(insert_link);
 	node.appendChild(insert_span);
 	node.appendChild(insert_div);
-	
 }
 
 function insert_detail_page_user_score(node,score,count,url){
