@@ -55,7 +55,7 @@ function insert_detail_page_meta_score(node,score,count,url){
 	const insert_div = document.createElement('div');
 	const insert_link = create_link(url);
 	const insert_meta_title = document.createElement('div');
-	if(score==='tbd'){
+	if(score==='tbd' || score==='na'){
 		insert_span.className='metascore_w tbd large';
 	} else if(score >= 75){
 		insert_span.className='metascore_w positive large';
@@ -79,7 +79,7 @@ function insert_detail_page_user_score(node,score,count,url){
 	const insert_div = document.createElement('div');
 	const insert_link = create_link(url);
 	const insert_score_title = document.createElement('div');
-	if(score==='tbd'){
+	if(score==='tbd' || score==='na'){
 		insert_span.className='metascore_w user tbd large';
 	} else if(score >= 7.5){
 		insert_span.className='metascore_w user positive large';
@@ -138,15 +138,18 @@ async function inject_game_list(){
 			if(await meta.get_metacritic_score()){
 				console.debug("Metacritic score found=", meta.meta_score, "for", psn_id);
 			} else {
-				console.debug("Metacritic score not found for", psn_id, "assuming tbd");
+				console.debug("Metacritic score not found for", psn_id, "assuming na");
 				meta.meta_score='na';
+				meta.meta_count=0;
 				meta.user_score='na';
+				meta.user_count=0;
 			}
 			insert_meta_score(insert_div,meta.meta_score);
 			const insert_span = document.createElement('span');
 			insert_span.textContent= '|';
 			insert_div.appendChild(insert_span);
 			insert_user_score(insert_div,meta.user_score);	
+			// below is TBD
 			const discount_badge = node.querySelector('.product-image__discount-badge');
 			if(discount_badge && discount_badge.clientHeight>0){
 				let discount = new Discount(window.location.host,locale,psn_id);
@@ -178,14 +181,17 @@ async function inject_detail_page(){
 		sku_info.parentNode.appendChild(insert_div);
 		sku_info.parentNode.appendChild(insert_user_div);
 		let meta= new MetaInfo(window.location.host,locale,psn_id);		
-		if (await meta.get_metacritic_score()){
-			insert_div.className += ' detail_metascore_container';
-			insert_detail_page_meta_score(insert_div,meta.meta_score,meta.meta_count,meta.url);				
-			if(meta.user_score!=='tbd'){
-				insert_user_div.className += ' detail_metascore_container';				
-				insert_detail_page_user_score(insert_user_div,meta.user_score,meta.user_count,meta.url);	
-			}
+		if (! await meta.get_metacritic_score()){
+			console.debug("No metacritic found, so assuming na");
+			meta.meta_score='na';
+			meta.meta_count=0;
+			meta.user_score='na';
+			meta.user_count=0;
 		}
+		insert_div.className += ' detail_metascore_container';
+		insert_detail_page_meta_score(insert_div,meta.meta_score,meta.meta_count,meta.url);				
+		insert_user_div.className += ' detail_metascore_container';				
+		insert_detail_page_user_score(insert_user_div,meta.user_score,meta.user_count,meta.url);	
 
 	}
 }
