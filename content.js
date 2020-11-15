@@ -125,6 +125,7 @@ async function inject_game_list(){
 	let nodelist = [...document.querySelectorAll('[data-qa="ems-sdk-product-tile"]')]; // get all elements with data-qa=ems-sdk-product-tile
 	let res = nodelist.map(async (node)=>{
 		if(!node.querySelector('.metascore_container')){
+			console.debug("Adding metacritic to ", node);
 			const infoplane = node.querySelector('section');
 			const insert_div = document.createElement('div');
 			const psn_link = node.querySelector('a');
@@ -162,6 +163,7 @@ async function inject_detail_page(){
 	const user_div = document.querySelector('#detail-user-score');
 
 	if(sku_info && !meta_div && !user_div){
+		console.debug("Injecting Metacritic to Detail Page");
 		const insert_div = document.createElement('div');
 		const insert_user_div = document.createElement('div');
 		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');		
@@ -186,6 +188,7 @@ async function inject_discount_info_detail_page(){
 	const sku_info = document.querySelector('[data-qa="mfe-game-title#name"]');
 	const discount_div = document.querySelector('#detail-discount');
 	if(sku_info && !discount_div){
+		console.debug("Injecting Discount to Detail Page");
 		const insert_low_price = document.createElement('div');
 		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');
 		sku_info.parentNode.appendChild(insert_low_price);
