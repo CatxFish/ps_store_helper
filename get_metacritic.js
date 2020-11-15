@@ -88,6 +88,7 @@ class MetaInfo {
   async get_metascore_from_metacritic(name) {
     const platform = this.get_metacritic_platform_alias(this.platform);
     const url = `https://www.metacritic.com/game/${platform}/${name}`;
+    console.debug("Fetching metacritic using", url);
     this.state = 'fetching metacritic';
     const response = await Utility.back_fetch(url);
     if (response.state === 'ok') {
@@ -158,6 +159,7 @@ class MetaInfo {
 
   get_metacritic_platform_alias(name) {
     const platform_list = {
+      'ps5': 'playstation-5',
       'ps4': 'playstation-4',
       'ps3': 'playstation-3',
       'ps2': 'playstation-2',
