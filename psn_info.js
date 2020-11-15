@@ -32,7 +32,7 @@ class Psn_info {
 
   async connect_psn(language) {
     const url = `https://${this.host}/store/api/chihiro/00_09_000/container/${this.country}/${language}/999/${this.id}`;
-    const platform_list = ['ps4', 'ps3', 'ps2', 'ps', 'psvita', 'psp'];
+    const platform_list = ['ps5', 'ps4', 'ps3', 'ps2', 'ps', 'psvita', 'psp'];
     try {
       const response = await fetch(url);
       if (!response.ok) {
