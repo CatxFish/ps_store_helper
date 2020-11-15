@@ -16,7 +16,7 @@ function create_link(link){
 
 function insert_meta_score(node,score){
 	const insert_span = document.createElement('span');
-	if(score==='tbd'){
+	if(score==='tbd' || score==='na'){
 		insert_span.className='metascore_w tbd';
 	}
 	else if(score >= 75){
@@ -25,15 +25,16 @@ function insert_meta_score(node,score){
 	else if(score >= 50){
 		insert_span.className='metascore_w mixed';
 	}
-	else 
+	else {
 		insert_span.className='metascore_w negtive';
+	}
 	insert_span.textContent= score;
 	node.appendChild(insert_span);
 }
 
 function insert_user_score(node,score){
 	const insert_span = document.createElement('span');
-	if(score==='tbd'){
+	if(score==='tbd' || score==='na'){
 		insert_span.className='metascore_w user tbd';
 	}
 	else if(score >= 7.5){
@@ -42,8 +43,9 @@ function insert_user_score(node,score){
 	else if(score >= 5){
 		insert_span.className='metascore_w user mixed';
 	}
-	else 
+	else {
 		insert_span.className='metascore_w user negtive';
+	}
 	insert_span.textContent= score;
 	node.appendChild(insert_span);
 }
@@ -125,7 +127,6 @@ async function inject_game_list(){
 	let nodelist = [...document.querySelectorAll('[data-qa="ems-sdk-product-tile"]')]; // get all elements with data-qa=ems-sdk-product-tile
 	let res = nodelist.map(async (node)=>{
 		if(!node.querySelector('.metascore_container')){
-			console.debug("Adding metacritic to ", node);
 			const infoplane = node.querySelector('section');
 			const insert_div = document.createElement('div');
 			const psn_link = node.querySelector('a');
@@ -135,12 +136,17 @@ async function inject_game_list(){
 			increase_height(node,insert_div.offsetHeight);
 			let meta= new MetaInfo(window.location.host,locale,psn_id);
 			if(await meta.get_metacritic_score()){
-				insert_meta_score(insert_div,meta.meta_score);
-				const insert_span = document.createElement('span');
-				insert_span.textContent= '|';
-				insert_div.appendChild(insert_span);
-				insert_user_score(insert_div,meta.user_score);	
+				console.debug("Metacritic score found=", meta.meta_score, "for", psn_id);
+			} else {
+				console.debug("Metacritic score not found for", psn_id, "assuming tbd");
+				meta.meta_score='na';
+				meta.user_score='na';
 			}
+			insert_meta_score(insert_div,meta.meta_score);
+			const insert_span = document.createElement('span');
+			insert_span.textContent= '|';
+			insert_div.appendChild(insert_span);
+			insert_user_score(insert_div,meta.user_score);	
 			const discount_badge = node.querySelector('.product-image__discount-badge');
 			if(discount_badge && discount_badge.clientHeight>0){
 				let discount = new Discount(window.location.host,locale,psn_id);
