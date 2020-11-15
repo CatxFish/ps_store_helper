@@ -114,18 +114,15 @@ function insert_detail_page_user_score(node,score,count,url){
 function insert_detail_page_discount(node,low_price,low_plus_price,url){
 	const title = document.createElement('p');
 	const price = document.createElement('p');
-	const divider = document.createElement('hr');
 	const price_link = create_link(url);
 	price_link.className += ' psw-link psw-standard-link';
 	const span_low_price = document.createElement('span');
 	title.textContent='Lowest price:';
 	span_low_price.textContent = `${low_price} / ${low_plus_price}(PS+)`;
-	divider.className='sku-info__divider';
 	price_link.appendChild(span_low_price);
 	price.appendChild(price_link);
 	node.appendChild(title);
 	node.appendChild(price);
-	node.appendChild(divider);
 }
 
 function insert_loweset_badge(node,lowest_state){
