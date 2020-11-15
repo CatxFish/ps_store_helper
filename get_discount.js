@@ -57,7 +57,6 @@ class Discount {
     const url = `https://psdeals.net/${this.country}-store/search?search_query=${key}&page=${page}&sort=title-desc&type=all`;
     try {
       const response = await Utility.back_fetch(url);
-      console.log("Fetching", url);
       if (response.state !== 'ok') {
         throw 'connect error';
       }
