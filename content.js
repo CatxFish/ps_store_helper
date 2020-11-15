@@ -10,6 +10,7 @@ function create_link(link){
 	const insert_link = document.createElement('a');
 	insert_link.setAttribute('href', link);
 	insert_link.setAttribute('target','_blank');
+	insert_link.className = ' psw-link psw-standard-link psw-h5 psw-c-accent-1 psw-c-interactive';
 	return insert_link;
 }
 
@@ -51,7 +52,6 @@ function insert_detail_page_meta_score(node,score,count,url){
 	const insert_span = document.createElement('span');
 	const insert_div = document.createElement('div');
 	const insert_link = create_link(url);
-	insert_link.className += ' psw-link psw-standard-link';
 	const insert_meta_title = document.createElement('div');
 	if(score==='tbd'){
 		insert_span.className='metascore_w tbd large';
@@ -76,7 +76,6 @@ function insert_detail_page_user_score(node,score,count,url){
 	const insert_span = document.createElement('span');
 	const insert_div = document.createElement('div');
 	const insert_link = create_link(url);
-	insert_link.className += ' psw-link psw-standard-link';
 	const insert_score_title = document.createElement('div');
 	if(score==='tbd'){
 		insert_span.className='metascore_w user tbd large';
@@ -101,7 +100,6 @@ function insert_detail_page_user_score(node,score,count,url){
 function insert_detail_page_discount(node,low_price,low_plus_price,url){
 	const title = document.createElement('p');
 	const price_link = create_link(url);
-	price_link.className += ' psw-link psw-standard-link';
 	title.textContent='Lowest price: ';
 	price_link.textContent = `${low_price} / ${low_plus_price}(PS+)`;
 	node.appendChild(title);
@@ -194,7 +192,7 @@ async function inject_discount_info_detail_page(){
 		insert_low_price.id='detail-discount';
 		let dicount = new Discount(window.location.host,locale,psn_id);
 		if(await dicount.get_lowest_price()){
-			insert_low_price.className = 'discount_container';
+			insert_low_price.className = 'psw-h5 discount_container';
 			insert_detail_page_discount(insert_low_price,dicount.low_price,dicount.low_plus_price,dicount.url);
 		}	
 	}
