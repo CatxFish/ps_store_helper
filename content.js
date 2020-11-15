@@ -51,6 +51,7 @@ function insert_detail_page_meta_score(node,score,count,url){
 	const insert_span = document.createElement('span');
 	const insert_div = document.createElement('div');
 	const insert_link = create_link(url);
+	insert_link.className += ' psw-link psw-standard-link';
 	const insert_meta_title = document.createElement('div');
 	const insert_meta_count = document.createElement('div');
 	if(score==='tbd'){
@@ -69,7 +70,7 @@ function insert_detail_page_meta_score(node,score,count,url){
 	insert_meta_title.className='detail_metascore_title';
 	insert_span.textContent= score;
 	insert_meta_title.textContent='MetaScore';
-	insert_meta_count.textContent=`${count} critics`;
+	insert_meta_count.textContent=` (${count} critics)`;
 	insert_link.appendChild(insert_meta_title);
 	insert_link.appendChild(insert_meta_count);
 	insert_div.appendChild(insert_link);
@@ -82,6 +83,7 @@ function insert_detail_page_user_score(node,score,count,url){
 	const insert_span = document.createElement('span');
 	const insert_div = document.createElement('div');
 	const insert_link = create_link(url);
+	insert_link.className += ' psw-link psw-standard-link';
 	const insert_score_title = document.createElement('div');
 	const insert_score_count = document.createElement('div');
 
@@ -101,7 +103,7 @@ function insert_detail_page_user_score(node,score,count,url){
 	insert_score_title.className='detail_metascore_title';
 	insert_span.textContent = score;
 	insert_score_title.textContent='MetaCritic user score';
-	insert_score_count.textContent=`${count} ratings`;
+	insert_score_count.textContent=` (${count} ratings)`;
 	insert_link.appendChild(insert_score_title);
 	insert_link.appendChild(insert_score_count);
 	insert_div.appendChild(insert_link);
@@ -114,6 +116,7 @@ function insert_detail_page_discount(node,low_price,low_plus_price,url){
 	const price = document.createElement('p');
 	const divider = document.createElement('hr');
 	const price_link = create_link(url);
+	price_link.className += ' psw-link psw-standard-link';
 	const span_low_price = document.createElement('span');
 	title.textContent='Lowest price:';
 	span_low_price.textContent = `${low_price} / ${low_plus_price}(PS+)`;
@@ -190,10 +193,10 @@ async function inject_detail_page(){
 		sku_info.parentNode.appendChild(insert_user_div);
 		let meta= new MetaInfo(window.location.host,locale,psn_id);		
 		if (await meta.get_metacritic_score()){
-			insert_div.className='detail_metascore_container';
+			insert_div.className += ' detail_metascore_container';
 			insert_detail_page_meta_score(insert_div,meta.meta_score,meta.meta_count,meta.url);				
 			if(meta.user_score!=='tbd'){
-				insert_user_div.className='detail_metascore_container';				
+				insert_user_div.className += ' detail_metascore_container';				
 				insert_detail_page_user_score(insert_user_div,meta.user_score,meta.user_count,meta.url);	
 			}
 		}
