@@ -78,27 +78,21 @@ function insert_detail_page_user_score(node,score,count,url){
 	const insert_link = create_link(url);
 	insert_link.className += ' psw-link psw-standard-link';
 	const insert_score_title = document.createElement('div');
-	const insert_score_count = document.createElement('div');
-
 	if(score==='tbd'){
 		insert_span.className='metascore_w user tbd large';
-	}
-	else if(score >= 7.5){
+	} else if(score >= 7.5){
 		insert_span.className='metascore_w user positive large';
-	}
-	else if(score >= 5){
+	} else if(score >= 5){
 		insert_span.className='metascore_w user mixed large';
-	}
-	else 
+	} else {
 		insert_span.className='metascore_w user negtive large';
+	}
 
 	insert_div.className ='detail_metascore_text small';
 	insert_score_title.className='detail_metascore_title';
 	insert_span.textContent = score;
-	insert_score_title.textContent='MetaCritic user score';
-	insert_score_count.textContent=` (${count} ratings)`;
+	insert_score_title.textContent=`MetaCritic user score (${count} ratings)`;
 	insert_link.appendChild(insert_score_title);
-	insert_link.appendChild(insert_score_count);
 	insert_div.appendChild(insert_link);
 	node.appendChild(insert_span);
 	node.appendChild(insert_div);
