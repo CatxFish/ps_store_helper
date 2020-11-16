@@ -32,17 +32,24 @@ class Psn_info {
 
   async connect_psn(language) {
     const url = `https://${this.host}/store/api/chihiro/00_09_000/container/${this.country}/${language}/999/${this.id}`;
-    const platform_list = ['ps4', 'ps3', 'ps2', 'ps', 'psvita', 'psp'];
+    const platform_list = ['ps5','ps4', 'ps3', 'ps2', 'ps', 'psvita', 'psp'];
     try {
       const response = await fetch(url);
       if (!response.ok) {
         throw 'connect error';
       }
       const res_json = await response.json();
-      if (!res_json.game_contentType) {
+      if (!res_json.top_category) {
         throw 'type error';
       }
-      this.platform = res_json.playable_platform[0].toLowerCase().replace(/[^a-z\d\-]/g, '');
+
+      if (Array.isArray(res_json.playable_platform)) {
+        this.platform = res_json.playable_platform[0].toLowerCase().replace(/[^a-z\d\-]/g, '');
+      }
+      else if (Array.isArray(res_json.playable_platform.values)){
+        this.platform = res_json.playable_platform.values[0].toLowerCase().replace(/[^a-z\d\-]/g, '');
+      }
+
       if (platform_list.indexOf(this.platform) != -1) {
         res_json.name && this.names.push(res_json.name);
         res_json.title_name && this.names.push(res_json.title_name);

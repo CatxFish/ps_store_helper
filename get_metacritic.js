@@ -158,6 +158,7 @@ class MetaInfo {
 
   get_metacritic_platform_alias(name) {
     const platform_list = {
+      'ps5': 'playstation-5',
       'ps4': 'playstation-4',
       'ps3': 'playstation-3',
       'ps2': 'playstation-2',

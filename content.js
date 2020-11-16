@@ -1,3 +1,13 @@
+function insertAfter(newElement, targetElement) {
+    var parent = targetElement.parentNode;
+    if (parent.lastChild == targetElement) {
+        parent.appendChild(targetElement);
+    } else {
+        parent.insertBefore(newElement, targetElement.nextSibling);
+    }
+}
+
+
 function increase_height(target,incresement){
 	let height = target.offsetHeight;
 	if(height){
@@ -111,18 +121,14 @@ function insert_detail_page_user_score(node,score,count,url){
 
 function insert_detail_page_discount(node,low_price,low_plus_price,url){
 	const title = document.createElement('p');
-	const price = document.createElement('p');
-	const divider = document.createElement('hr');
 	const price_link = create_link(url);
 	const span_low_price = document.createElement('span');
-	title.textContent='Lowest price:';
+	span_low_price.className = "detail_discount_text"
+	title.textContent='Historical lowest : ';
 	span_low_price.textContent = `${low_price} / ${low_plus_price}(PS+)`;
-	divider.className='sku-info__divider';
 	price_link.appendChild(span_low_price);
-	price.appendChild(price_link);
+	title.appendChild(price_link);
 	node.appendChild(title);
-	node.appendChild(price);
-	node.appendChild(divider);
 }
 
 function insert_loweset_badge(node,lowest_state){
@@ -141,7 +147,7 @@ function insert_loweset_badge(node,lowest_state){
 }
 
 async function inject_game_list(){
-	let nodelist = [...document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')];
+	let nodelist = [...document.querySelectorAll('.ems-sdk-product-tile')];
 	let k = Math.ceil(nodelist.length/5)
 	for(i=0; i<k; i++)
 	{
@@ -156,19 +162,12 @@ async function inject_game_list(){
 
 		let res = await Promise.all(updatelist.map(async (node)=>{
 			if(!node.querySelector('.metascore_container')){
-				const infoplane = node.querySelector('.grid-cell__body');
-				const out_box = node.querySelector('.grid-cell');
+				const image_box = node.querySelector('.ems-sdk-product-tile-image')
 				const insert_div = document.createElement('div');
-				const infoplane_bot = infoplane.querySelector('.grid-cell__bottom');
-				const infoplane_parent = infoplane_bot.parentNode;
-				const psn_link = infoplane.querySelector('a');
+				const psn_link = node.querySelector('a');
 				const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
 				insert_div.className='metascore_container';
-				infoplane_parent.insertBefore(insert_div,infoplane_bot);
-				increase_height(node,insert_div.offsetHeight);
-				increase_height(infoplane,insert_div.offsetHeight);
-				increase_height(out_box,insert_div.offsetHeight);
-				document.querySelectorAll('.__desktop-presentation__grid-cell__base__0ba9f')
+				image_box.appendChild(insert_div)
 				let meta= new MetaInfo(window.location.host,locale,psn_id);
 				if(await meta.get_metacritic_score()){
 					insert_meta_score(insert_div,meta.meta_score);
@@ -177,16 +176,14 @@ async function inject_game_list(){
 					insert_div.appendChild(insert_span);
 					insert_user_score(insert_div,meta.user_score);	
 				}
-				const discount_badge = node.querySelector('.product-image__discount-badge');
-				if(discount_badge && discount_badge.clientHeight>0){
+				const discount_badge = node.querySelector('.discount-badge__container');
+				if(discount_badge){
 					let discount = new Discount(window.location.host,locale,psn_id);
 					if(await discount.get_lowest_price()){
 						lowest_state = await discount.is_lowest_price();
 						if(lowest_state>0){
-							const img_plane = node.querySelector('.product-image')
-							insert_loweset_badge(img_plane,lowest_state);
+							insert_loweset_badge(image_box,lowest_state);
 						}
-
 					}
 				}
 			}
@@ -194,19 +191,20 @@ async function inject_game_list(){
 	}
 }
 
-async function inject_detail_page(){
-	const sku_info = document.querySelector('div.sku-info');
+async function inject_detail_page(psn_id){
+	const sku_info = document.querySelector('[data-qa="mfe-game-title"]');
 	const meta_div = document.querySelector('#detail-meta-score');
 	const user_div = document.querySelector('#detail-user-score');
 
 	if(sku_info && !meta_div && !user_div){
+		const main_div = document.createElement('div');
 		const insert_div = document.createElement('div');
-		const insert_user_div = document.createElement('div');
-		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');		
+		const insert_user_div = document.createElement('div');	
 		insert_div.id = 'detail-meta-score';
 		insert_user_div.id = 'detail-user-score';
-		sku_info.parentNode.insertBefore(insert_div,sku_info.nextSibling);
-		sku_info.parentNode.insertBefore(insert_user_div,insert_div.nextSibling);
+		sku_info.parentNode.append(main_div);
+		main_div.append(insert_div);
+		main_div.append(insert_user_div);
 		let meta= new MetaInfo(window.location.host,locale,psn_id);		
 		if (await meta.get_metacritic_score()){
 			insert_div.className='detail_metascore_container';
@@ -220,21 +218,44 @@ async function inject_detail_page(){
 	}
 }
 
-async function inject_discount_info_detail_page(){
-	const sku_info = document.querySelector('div.sku-info');
-	const discount_div = document.querySelector('#detail-discount');
-	if(sku_info && !discount_div){
-		const insert_low_price = document.createElement('div');
-		const playable = sku_info.querySelector('.playable-on');
-		const psn_id = document.URL.match('([^/]+)$')[1].replace(/\?.*$/,'');
-		sku_info.insertBefore(insert_low_price,playable);
-		insert_low_price.id='detail-discount';
-		let dicount = new Discount(window.location.host,locale,psn_id);
-		if(await dicount.get_lowest_price()){
-			insert_low_price.className = 'discount_container';
-			insert_detail_page_discount(insert_low_price,dicount.low_price,dicount.low_plus_price,dicount.url);
-		}	
+async function inject_discount_info_detail_page(psn_id){
+	const div_info = document.querySelector('[data-qa="mfeCtaMain#cta"]')
+
+	if(div_info) {	
+		const discount_div = div_info.parentNode.querySelector('#detail-discount');
+		if(!discount_div){
+			
+			const insert_low_price = document.createElement('div');
+			div_info.parentNode.insertBefore(insert_low_price,div_info)
+			insert_low_price.id='detail-discount';
+			let discount = new Discount(window.location.host,locale,psn_id);
+			if(await discount.get_lowest_price()){
+				insert_low_price.className = 'discount_container';
+				insert_detail_page_discount(insert_low_price,discount.low_price,discount.low_plus_price,discount.url);
+			}	
+		}
 	}
+
+	
+	const related_sells = document.querySelectorAll('[data-qa$="#ctaWithPrice#cta"]')
+	
+	for (let sell of related_sells) {
+		let related_id = get_psn_id(sell)
+		let related_div = sell.parentNode.querySelector('.discount_container');
+		
+		if(!related_div){			
+			let discount = new Discount(window.location.host,locale,related_id);		
+			let related_low_price = document.createElement('div');
+			related_low_price.className = 'discount_container';
+			sell.parentNode.insertBefore(related_low_price,sell)			
+			if(await discount.get_lowest_price()){
+				insert_detail_page_discount(related_low_price,discount.low_price,discount.low_plus_price,discount.url);
+			}	
+			
+		}
+		
+	}
+	
 }
 
 function clear_inject(){
@@ -246,24 +267,48 @@ function clear_inject(){
 	discount_div && discount_div.parentNode.removeChild(discount_div);
 }
 
+function get_psn_id(root) {
+	const button = root.querySelector('button')
+	if (button){
+		const psn_data = button.getAttribute("data-telemetry-meta")
+		if (psn_data){
+			const psn_json_data = JSON.parse(psn_data)
+			const productDetail = psn_json_data.productDetail
+			if(productDetail && Array.isArray(productDetail) && productDetail.length >0 && productDetail[0].productId) {
+				const psn_id = psn_json_data.productDetail[0].productId
+				return psn_id
+			}
+		}
+	}
+	return null
+}
+
 let last_inject_url;
 const locale = document.URL.split('/')[3];
 
 const observer = new MutationObserver( mutations=> {
-	inject_detail_page();
-	inject_discount_info_detail_page();
+	const detail_button = document.querySelector('[data-qa="mfeCtaMain#cta"]')
+	if(detail_button) {
+		psn_id  =  get_psn_id(detail_button)
+		if (psn_id) {
+			inject_detail_page(psn_id);
+			inject_discount_info_detail_page(psn_id);
+		}
+	}
+
 	inject_game_list();
+	
 });
 
 chrome.runtime.onMessage.addListener((request, sender, callback) =>{
 	if (request.action === 'inject_metacritic'){
-		const target = document.querySelector('.application-container');
-		const config = { attributes: true, childList: true, characterData: true ,subtree: true};
-		observer.observe(target, config);
+		const target = document.querySelector('body');
+		const config = { attributes: false, childList: true, characterData: false ,subtree: true};		
 		if(document.URL !== last_inject_url){
 			clear_inject();
 			last_inject_url = document.URL;
 		}
+		observer.observe(target, config);
 	}
 	else if(request.action ==='disable_inject'){
 		observer.disconnect();

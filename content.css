@@ -21,14 +21,24 @@
 }
 
 .detail_metascore_container{
-    border: 1px solid rgba(255,255,255,0.1);
-    background-color: rgba(255,255,255,0.05);
-    padding: 0.5em;
+    display: inline-block;
     margin-top: 0.8em;
+    margin-right: 2em;
 }
 
 .detail_metascore_container a:hover{
     color: #87cefa;
+}
+
+.detail_metascore_container a:link{
+    color: #fff;
+    text-decoration:none;
+}
+
+
+.detail_metascore_container a:visited{
+    color: #fff;
+    text-decoration:none;
 }
 
 .detail_metascore_title{
@@ -41,17 +51,19 @@
     margin-left: 0.8em;
 }
 .metascore_container{
-    height:2em;
-    padding: .4375em;
+    bottom: .5rem;
+    display: flex;
+    flex-wrap: nowrap;
+    right: .5rem;
+    position: absolute
 }
 
 .lowest_badge{
     position: absolute;
     top: 0em;
     z-index: 2;
-    height: 18px;
-    font-size: 11px;
-    line-height: 18px;
+    height: 1.8em;
+    line-height: 1.8em;
     padding: 0 .25em;
 }
 
@@ -72,6 +84,16 @@
 
 .discount_container{
     font-size: 0.85em!important;
+}
+
+.discount_container a:link
+{
+    color: #fff;
+}
+
+.discount_container a:visited
+{
+    color: #fff;
 }
 
 .discount_container a:hover{
