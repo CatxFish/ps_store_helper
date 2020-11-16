@@ -165,6 +165,9 @@ async function inject_game_list(){
 				const image_box = node.querySelector('.ems-sdk-product-tile-image')
 				const insert_div = document.createElement('div');
 				const psn_link = node.querySelector('a');
+				if (!psn_link) {
+					return
+				}
 				const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
 				insert_div.className='metascore_container';
 				image_box.appendChild(insert_div)
@@ -219,18 +222,16 @@ async function inject_detail_page(psn_id){
 }
 
 async function inject_discount_info_detail_page(psn_id){
-	const div_info = document.querySelector('[data-qa="mfeCtaMain#cta"]')
+	const div_infos = document.querySelectorAll('[data-qa="mfeCtaMain#cta"]')
 
-	if(div_info) {	
-		const discount_div = div_info.parentNode.querySelector('#detail-discount');
-		if(!discount_div){
-			
+	for (let div_info of div_infos){
+		const discount_div = div_info.parentNode.querySelector('.discount_container');
+		if(!discount_div){			
 			const insert_low_price = document.createElement('div');
 			div_info.parentNode.insertBefore(insert_low_price,div_info)
-			insert_low_price.id='detail-discount';
+			insert_low_price.className = 'discount_container';
 			let discount = new Discount(window.location.host,locale,psn_id);
 			if(await discount.get_lowest_price()){
-				insert_low_price.className = 'discount_container';
 				insert_detail_page_discount(insert_low_price,discount.low_price,discount.low_plus_price,discount.url);
 			}	
 		}
