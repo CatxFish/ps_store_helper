@@ -51,6 +51,7 @@ function insert_user_score(node,score){
 }
 
 function insert_detail_page_meta_score(node,score,count,url){
+	node.className += ' detail_metascore_container';
 	const insert_span = document.createElement('span');
 	const insert_div = document.createElement('div');
 	const insert_link = create_link(url);
@@ -75,6 +76,7 @@ function insert_detail_page_meta_score(node,score,count,url){
 }
 
 function insert_detail_page_user_score(node,score,count,url){
+	node.className += ' detail_metascore_container';				
 	const insert_span = document.createElement('span');
 	const insert_div = document.createElement('div');
 	const insert_link = create_link(url);
@@ -100,6 +102,7 @@ function insert_detail_page_user_score(node,score,count,url){
 }
 
 function insert_detail_page_discount(node,low_price,low_plus_price,url){
+	node.className+=' psw-h5 discount_container';
 	const title = document.createElement('p');
 	const price_link = create_link(url);
 	title.textContent='Lowest price: ';
@@ -113,11 +116,9 @@ function insert_loweset_badge(node,lowest_state){
 	div.textContent='Lowest';
 	if(lowest_state === 1){
 		div.className='lowest_badge regular_lowest';
-	}
-	else if(lowest_state === 2){
+	} else if(lowest_state === 2){
 		div.className='lowest_badge plus_lowest';
-	}
-	else if(lowest_state === 3){
+	} else if(lowest_state === 3){
 		div.className='lowest_badge both_lowest';
 	}
 	node.appendChild(div);
@@ -149,14 +150,13 @@ async function inject_game_list(){
 			insert_span.textContent= '|';
 			insert_div.appendChild(insert_span);
 			insert_user_score(insert_div,meta.user_score);	
-			// below is TBD
-			const discount_badge = node.querySelector('.product-image__discount-badge');
-			if(discount_badge && discount_badge.clientHeight>0){
+			const discount_badge = node.querySelector('.lowest_badge');
+			if(!discount_badge){
 				let discount = new Discount(window.location.host,locale,psn_id);
 				if(await discount.get_lowest_price()){
 					lowest_state = await discount.is_lowest_price();
 					if(lowest_state>0){
-						const img_plane = node.querySelector('.product-image')
+						const img_plane = node.querySelector('[data-qa="ems-sdk-product-tile-image"]');
 						insert_loweset_badge(img_plane,lowest_state);
 					}
 
@@ -188,9 +188,7 @@ async function inject_detail_page(){
 			meta.user_score='na';
 			meta.user_count=0;
 		}
-		insert_div.className += ' detail_metascore_container';
 		insert_detail_page_meta_score(insert_div,meta.meta_score,meta.meta_count,meta.url);				
-		insert_user_div.className += ' detail_metascore_container';				
 		insert_detail_page_user_score(insert_user_div,meta.user_score,meta.user_count,meta.url);	
 
 	}
@@ -207,7 +205,6 @@ async function inject_discount_info_detail_page(){
 		insert_low_price.id='detail-discount';
 		let dicount = new Discount(window.location.host,locale,psn_id);
 		if(await dicount.get_lowest_price()){
-			insert_low_price.className = 'psw-h5 discount_container';
 			insert_detail_page_discount(insert_low_price,dicount.low_price,dicount.low_plus_price,dicount.url);
 		}	
 	}
