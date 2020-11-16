@@ -50,10 +50,10 @@ class Psn_info {
         this.platform = res_json.playable_platform.values[0].toLowerCase().replace(/[^a-z\d\-]/g, '');
       }
 
-      if (platform_list.indexOf(this.platform) != -1) {
-        res_json.name && this.names.push(res_json.name);
+      if (platform_list.indexOf(this.platform) != -1) {       
         res_json.title_name && this.names.push(res_json.title_name);
         res_json.parent_name && this.names.push(res_json.parent_name);
+        res_json.name && this.names.push(res_json.name);
         this.names = this.names.filter((elem, index, self) => { return index == self.indexOf(elem) });
         let rewards = res_json.default_sku.rewards;
         if (rewards.length > 0) {
