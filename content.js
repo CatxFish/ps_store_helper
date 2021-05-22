@@ -153,7 +153,7 @@ async function inject_game_list(){
 	{
 		start = i*5
 		if(i == k-1)
-			end = nodelist.length%5
+			end = start + nodelist.length % 5
 		else
 			end = (i+1)*5
 		
@@ -191,6 +191,7 @@ async function inject_game_list(){
 				}
 			}
 		}))
+		await new Promise(r => setTimeout(r, 1000));
 	}
 }
 
