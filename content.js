@@ -148,50 +148,52 @@ function insert_loweset_badge(node,lowest_state){
 
 async function inject_game_list(){
 	let nodelist = [...document.querySelectorAll('.ems-sdk-product-tile')];
-	let k = Math.ceil(nodelist.length/5)
-	for(i=0; i<k; i++)
+	for(const node of nodelist)
 	{
-		start = i*5
-		if(i == k-1)
-			end = start + nodelist.length % 5
-		else
-			end = (i+1)*5
-		
-		updatelist = nodelist.slice(start,end)
+		let k = Math.ceil(nodelist.length/3)
+		for(i=0; i<k; i++)
+		{
+			start = i*3
+			if(i == k-1)
+				end = nodelist.length
+			else
+				end = (i+1)*3
+			
+			updatelist = nodelist.slice(start,end)
 
+			await Promise.any(updatelist.map(async (node)=>{
+				if(document.contains(node) && !node.querySelector('.metascore_container')){
+					const image_box = node.querySelector('.ems-sdk-product-tile-image')
+					const insert_div = document.createElement('div');
+					const psn_link = node.querySelector('a');
+					if (!psn_link) {
+						return
+					}
+					const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
+					insert_div.className='metascore_container';
+					image_box.appendChild(insert_div)
+					let meta= new MetaInfo(window.location.host,locale,psn_id);
+					if(document.contains(node) && await meta.get_metacritic_score()){
+						insert_meta_score(insert_div,meta.meta_score);
+						const insert_span = document.createElement('span');
+						insert_span.textContent= '|';
+						insert_div.appendChild(insert_span);
+						insert_user_score(insert_div,meta.user_score);	
+					}
 
-		let res = await Promise.all(updatelist.map(async (node)=>{
-			if(!node.querySelector('.metascore_container')){
-				const image_box = node.querySelector('.ems-sdk-product-tile-image')
-				const insert_div = document.createElement('div');
-				const psn_link = node.querySelector('a');
-				if (!psn_link) {
-					return
-				}
-				const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
-				insert_div.className='metascore_container';
-				image_box.appendChild(insert_div)
-				let meta= new MetaInfo(window.location.host,locale,psn_id);
-				if(await meta.get_metacritic_score()){
-					insert_meta_score(insert_div,meta.meta_score);
-					const insert_span = document.createElement('span');
-					insert_span.textContent= '|';
-					insert_div.appendChild(insert_span);
-					insert_user_score(insert_div,meta.user_score);	
-				}
-				const discount_badge = node.querySelector('.discount-badge__container');
-				if(discount_badge){
-					let discount = new Discount(window.location.host,locale,psn_id);
-					if(await discount.get_lowest_price()){
-						lowest_state = await discount.is_lowest_price();
-						if(lowest_state>0){
-							insert_loweset_badge(image_box,lowest_state);
+					const discount_badge = node.querySelector('.discount-badge__container');
+					if(document.contains(node) && discount_badge && !node.querySelector('.lowest_badge')){
+						let discount = new Discount(window.location.host,locale,psn_id);
+						if(await discount.get_lowest_price()){
+							lowest_state = await discount.is_lowest_price();
+							if(lowest_state>0){
+								insert_loweset_badge(image_box,lowest_state);
+							}
 						}
 					}
 				}
-			}
-		}))
-		await new Promise(r => setTimeout(r, 1000));
+			}))
+		}
 	}
 }
 
@@ -286,10 +288,27 @@ function get_psn_id(root) {
 }
 
 let last_inject_url;
+let last_inject_game_list_time = new Date().getTime()
 const locale = document.URL.split('/')[3];
 
+function checkmutations(mutations) {
+
+	added_by_extension = false
+
+	for (mutation of mutations) {
+		for (node of mutation.addedNodes) {
+			added_by_extension = node.classList.contains("metascore_container") || 
+								 node.classList.contains("lowest_badge") ||
+								 node.classList.contains("metascore_w")
+		}
+	}
+
+	return added_by_extension
+}
+
+
 const observer = new MutationObserver( mutations=> {
-	const detail_button = document.querySelector('[data-qa="mfeCtaMain#cta"]')
+	const detail_button = document.querySelector('[data-qa="mfeCtaMain#cta"]');
 	if(detail_button) {
 		psn_id  =  get_psn_id(detail_button)
 		if (psn_id) {
@@ -297,9 +316,11 @@ const observer = new MutationObserver( mutations=> {
 			inject_discount_info_detail_page(psn_id);
 		}
 	}
-
-	inject_game_list();
-	
+	let now_time = new Date().getTime()
+	if (now_time > last_inject_game_list_time && !checkmutations(mutations)) {
+		setTimeout(()=> { inject_game_list() }, 1000);
+		last_inject_game_list_time = now_time + 1000;
+	}	
 });
 
 chrome.runtime.onMessage.addListener((request, sender, callback) =>{

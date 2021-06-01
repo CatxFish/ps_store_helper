@@ -12,6 +12,7 @@ class MetaInfo {
     this.platform = "";
     this.meta_name = [];
     this.url = '';
+    this.read_from_storage = false
   }
 
   async load_metacritic_name_from_stroage(key) {
@@ -120,6 +121,7 @@ class MetaInfo {
   async get_metacritic_score() {
 
     if (await this.load_metacritic_name_from_stroage(this.id)) {
+      this.read_from_storage =  true
       if (this.state === 'skip') {
         return false;
       }

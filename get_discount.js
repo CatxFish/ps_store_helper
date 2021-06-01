@@ -10,6 +10,7 @@ class Discount {
     this.low_price = "";
     this.low_plus_price = "";
     this.url = '';
+    this.read_from_storage = false
   }
 
   async load_price_from_storage(key) {
@@ -117,6 +118,7 @@ class Discount {
   async get_lowest_price() {
 
     if (await this.load_price_from_storage(this.id)) {
+      this.read_from_storage = true
       return true;
     }
     else if (this.state === 'storage not found') {
