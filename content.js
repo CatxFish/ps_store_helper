@@ -161,38 +161,46 @@ async function inject_game_list(){
 			
 			updatelist = nodelist.slice(start,end)
 
-			await Promise.any(updatelist.map(async (node)=>{
-				if(document.contains(node) && !node.querySelector('.metascore_container')){
-					const image_box = node.querySelector('.ems-sdk-product-tile-image')
-					const insert_div = document.createElement('div');
-					const psn_link = node.querySelector('a');
-					if (!psn_link) {
-						return
-					}
-					const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
-					insert_div.className='metascore_container';
-					image_box.appendChild(insert_div)
-					let meta= new MetaInfo(window.location.host,locale,psn_id);
-					if(document.contains(node) && await meta.get_metacritic_score()){
-						insert_meta_score(insert_div,meta.meta_score);
-						const insert_span = document.createElement('span');
-						insert_span.textContent= '|';
-						insert_div.appendChild(insert_span);
-						insert_user_score(insert_div,meta.user_score);	
-					}
-
-					const discount_badge = node.querySelector('.discount-badge__container');
-					if(document.contains(node) && discount_badge && !node.querySelector('.lowest_badge')){
-						let discount = new Discount(window.location.host,locale,psn_id);
-						if(await discount.get_lowest_price()){
-							lowest_state = await discount.is_lowest_price();
-							if(lowest_state>0){
-								insert_loweset_badge(image_box,lowest_state);
+			try {
+				await Promise.any(updatelist.map(async (node)=>{
+					if(document.contains(node) && !node.querySelector('.metascore_container')){
+						const image_box = node.querySelector('.ems-sdk-product-tile-image')
+						const insert_div = document.createElement('div');
+						const psn_link = node.querySelector('a');
+						if (!psn_link) {
+							return
+						}
+						const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
+						insert_div.className='metascore_container';
+						image_box.appendChild(insert_div)
+						let meta= new MetaInfo(window.location.host,locale,psn_id);
+						
+						const discount_badge = node.querySelector('.discount-badge__container');
+						if(document.contains(node) && discount_badge && !node.querySelector('.lowest_badge')){
+							let discount = new Discount(window.location.host,locale,psn_id);
+							if(await discount.get_lowest_price()){
+								lowest_state = await discount.is_lowest_price();
+								if(lowest_state>0){
+									insert_loweset_badge(image_box,lowest_state);
+								}
 							}
 						}
-					}
-				}
-			}))
+
+						if(document.contains(node) && await meta.get_metacritic_score()){
+							insert_meta_score(insert_div,meta.meta_score);
+							const insert_span = document.createElement('span');
+							insert_span.textContent= '|';
+							insert_div.appendChild(insert_span);
+							insert_user_score(insert_div,meta.user_score);	
+						}
+
+
+					}			
+				}))
+			}
+			catch (error) {
+				// do nothing , keep going
+			}
 		}
 	}
 }
