@@ -147,7 +147,7 @@ function insert_loweset_badge(node,lowest_state){
 }
 
 async function inject_game_list(){
-	let nodelist = [...document.querySelectorAll('.ems-sdk-product-tile')];
+	let nodelist = [...document.querySelectorAll('.psw-product-tile')];
 	for(const node of nodelist)
 	{
 		let k = Math.ceil(nodelist.length/3)
@@ -164,18 +164,21 @@ async function inject_game_list(){
 			try {
 				await Promise.any(updatelist.map(async (node)=>{
 					if(document.contains(node) && !node.querySelector('.metascore_container')){
-						const image_box = node.querySelector('.ems-sdk-product-tile-image')
+						const image_box = node.querySelector('.psw-game-art')
 						const insert_div = document.createElement('div');
-						const psn_link = node.querySelector('a');
-						if (!psn_link) {
+						let psn_id = "0000"
+						if (node.parentNode && node.parentNode.tagName == 'A') {
+							psn_id = node.parentNode.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
+						}
+						else {
 							return
 						}
-						const psn_id = psn_link.getAttribute("href").match('([^/]+)$')[1].replace(/\?.*$/,'');
+
 						insert_div.className='metascore_container';
 						image_box.appendChild(insert_div)
 						let meta= new MetaInfo(window.location.host,locale,psn_id);
 						
-						const discount_badge = node.querySelector('.discount-badge__container');
+						const discount_badge = node.querySelector('.psw-discount-badge');
 						if(document.contains(node) && discount_badge && !node.querySelector('.lowest_badge')){
 							let discount = new Discount(window.location.host,locale,psn_id);
 							if(await discount.get_lowest_price()){

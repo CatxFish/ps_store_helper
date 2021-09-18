@@ -1,6 +1,6 @@
 {
     "name": "PS Store Helper",
-    "version": "2.0.4",
+    "version": "2.0.5",
     "background": {
         "scripts": ["background.js"]
     },
